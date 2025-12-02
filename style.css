@@ -1,0 +1,25 @@
+body, html{
+    margin: 0;
+    height: calc(100% - 10px);
+}
+
+#field{
+    height: calc(100% - 50px);
+    border: 1px solid green;
+}
+
+.snake_segment{
+    position: absolute;
+}
+
+svg{
+    width: 100%;
+    height: 100%;
+}
+
+.CFood{
+    border: 1px solid yellow;
+    background-color: greenyellow;
+    border-radius: 50%;
+    position: absolute;
+}

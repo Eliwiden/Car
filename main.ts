@@ -29,19 +29,7 @@ class CCar extends CScreenObject{
         }
     }
     constructor(x: number, y: number, size: number){
-        function CreateCar(x: number, y: number, size: number){//Создаём сегмент змейки
-            const dom = document.createElement('div');//Создаём контейнер div
-            dom.className = 'CCar';//Присваиваем класс для стилей
-            dom.style.top = (y - size/2) + 'px';//Позиция по вертикали
-            dom.style.left = (x - size/2) + 'px';//Позиция по горизонтали
-            dom.style.height = size + 'px';//Задаём высоту
-            dom.style.width = size + 'px';//Задаём ширину
-            dom.innerHTML = ravSvg;
-            document.body.append(dom);//Добавляем сегмент в тело документа
-            return dom;//Возвращаем созданный элемент
-        }
-
-        super(x, y, size, CreateCar);
+        super(x, y, size, ()=>{CreateObj(x, y, size, "CCar", ravSvg)});
     }
 }
 
@@ -50,8 +38,19 @@ class CObstacle extends CScreenObject{
 }
 
 class CCoins extends CScreenObject{
-
+    constructor(x: number, y: number, size: number){
+        super(x, y, size, ()=>{CreateObj(x, y, size, "Coin", "<br>BTC")});
+    }
 }
+
+const aCoins: CCoins[]=[];//Создаём пустой массив монет
+
+setInterval(()=>{
+    //Генерим случайную координату для еды
+        const x = Math.random()*(document.documentElement.clientWidth - 200)+ 100;
+        const y = Math.random()*(document.documentElement.clientHeight - 200)+ 100;
+        aCoins.push(new CCoins(x, y, 50));
+}, 2000)
 
 window.addEventListener("keydown",(e:KeyboardEvent) =>{
     e.preventDefault()

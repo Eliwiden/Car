@@ -10,3 +10,11 @@ body{
 .CCar{
    position: absolute;
 }
+
+.Coin{
+    position: absolute;
+    border: solid 2px goldenrod;
+    color: darkorange;
+    background-color: chocolate;
+    text-align: center;
+}

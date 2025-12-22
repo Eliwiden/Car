@@ -9,6 +9,11 @@ class CScreenObject{
         this.nY = y;
         this.nSize = size;
     }
+
+    Dissapear(){
+        this.dom.remove();
+    }
+
 }
 
 const ravSvg = `<svg viewBox="0 0 100 100">
@@ -29,17 +34,48 @@ class CCar extends CScreenObject{
         }
     }
     constructor(x: number, y: number, size: number){
-        super(x, y, size, ()=>{CreateObj(x, y, size, "CCar", ravSvg)});
+        super(x, y, size, ()=>{return CreateObj(x, y, size, "CCar", ravSvg)});
     }
 }
 
 class CObstacle extends CScreenObject{
+    Fall(step: number) {
+        const item = this.dom.getBoundingClientRect();
+        const fieldRect = document.getElementById('field')!.getBoundingClientRect();
+
+        if (item.bottom + step <= fieldRect.bottom + 100) {
+            this.nY += step;
+            this.dom.style.top = (this.nY - this.nSize / 2) + 'px';
+        }
+
+    }
+    constructor(x: number, y: number, size: number){
+        super(x, y, size, ()=>{return CreateObj(x, y, size, "OBSTACLE", "ravSvg")});
+    }
+}
+const aObstacles: CObstacle[]=[];//Создаём пустой массив монет
+
+function createObstacle(){
+    const fieldRect = document.getElementById('field')!.getBoundingClientRect();
+    const x = Math.random() * (fieldRect.right - fieldRect.left - 100) + fieldRect.left + 50;
+    const y = -100;
+    const size = 50;
     
+    const obstacle = new CObstacle(x, y, size);
+    //aObstacles.push(new CObstacle);
 }
 
 class CCoins extends CScreenObject{
+    Fall(step: number){
+        const item = this.dom.getBoundingClientRect();
+        const oItem = document.getElementById('field')!.getBoundingClientRect();//Получаем размер и позицию границы поля относительно окна
+        if(item.bottom + step <= oItem.bottom && item.left + step >= oItem.left){
+            this.nY += step;//Меняем виртуальное положение
+            this.dom.style.top = (this.nY-this.nSize/2) + 'px';//Обновляем позицию DOM элемента по X
+        }
+    }
     constructor(x: number, y: number, size: number){
-        super(x, y, size, ()=>{CreateObj(x, y, size, "Coin", "<br>BTC")});
+        super(x, y, size, ()=>{return CreateObj(x, y, size, "Coin", "<br>BTC")});
     }
 }
 
@@ -50,7 +86,11 @@ setInterval(()=>{
         const x = Math.random()*(document.documentElement.clientWidth - 200)+ 100;
         const y = Math.random()*(document.documentElement.clientHeight - 200)+ 100;
         aCoins.push(new CCoins(x, y, 50));
-}, 2000)
+    if(aCoins.length > 5){
+        aCoins[0].Dissapear();
+        aCoins.splice(0,1);
+    }
+}, 1000)
 
 window.addEventListener("keydown",(e:KeyboardEvent) =>{
     e.preventDefault()

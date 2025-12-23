@@ -19,3 +19,7 @@ body{
     text-align: center;
     border-radius: 50%;
 }
+
+.Obstacle{
+   position: absolute;
+}

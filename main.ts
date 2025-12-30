@@ -13,21 +13,23 @@ const ravSvgObst = `<svg viewBox="0 0 100 100">
 const obstacleSize = 20;
 const speed = 30;
 let bObstacleEnough = false;
-setInterval(()=>{
+let x = 100;
+let idObstacle = setInterval(()=>{
     const fieldRect = document.body.getBoundingClientRect();
     if(!bObstacleEnough){
-        const x = Math.random() * (fieldRect.right - fieldRect.left - 100) + fieldRect.left + 50;
         createObstacle(x);
+        x = CalcNextX(x, fieldRect.right);
     }
 
     for(let i = aObstacles.length - 1; i >= 0; i--){
         const obstacle = aObstacles[i];
-        obstacle.Fall(speed);
+        obstacle.Fall(speed, car);
 
         if(obstacle.nY > fieldRect.bottom){
             bObstacleEnough = true;
-            obstacle.Fall(-fieldRect.height-200);
-            obstacle.setX(Math.random() * (fieldRect.right - fieldRect.left - 100) + fieldRect.left + 50);
+            obstacle.Fall(-fieldRect.height-150, car);
+            obstacle.setX(x);
+            x = CalcNextX(x, fieldRect.right);
         }
     }
 
@@ -35,7 +37,7 @@ setInterval(()=>{
 
 const aCoins: CCoins[]=[];//Создаём пустой массив монет
 
-setInterval(()=>{
+let idCoins = setInterval(()=>{
     //Генерим случайную координату для еды
         const x = Math.random()*(document.documentElement.clientWidth - 200)+ 100;
         const y = Math.random()*(document.documentElement.clientHeight - 200)+ 100;
@@ -46,7 +48,7 @@ setInterval(()=>{
     }
 }, 1000)
 
-window.addEventListener("keydown",(e:KeyboardEvent) =>{
+window.onkeydown=(e:KeyboardEvent) =>{
     e.preventDefault()
     switch(e.code){
         case "ArrowLeft": car.Move(-5);
@@ -54,6 +56,6 @@ window.addEventListener("keydown",(e:KeyboardEvent) =>{
         case "ArrowRight": car.Move(5);
         break;
     }
-})
+}
 
 const car = new CCar(document.documentElement.clientWidth/2, document.documentElement.clientHeight/2, 100);

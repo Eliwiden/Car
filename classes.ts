@@ -28,10 +28,15 @@ class CCar extends CScreenObject{
     constructor(x: number, y: number, size: number){
         super(x, y, size, ()=>{return CreateObj(x, y, size, "CCar", ravSvg)});
     }
+
+    Crash(){
+        this.dom.classList.add("CrashCar");
+        EndGame();
+    }
 }
 
 class CObstacle extends CScreenObject{
-    Fall(step: number) {
+    Fall(step: number, car: CCar) {
         //const item = this.dom.getBoundingClientRect();
         //const fieldRect = document.getElementById('field')!.getBoundingClientRect();
 
@@ -39,6 +44,10 @@ class CObstacle extends CScreenObject{
             this.nY += step;
             this.dom.style.top = (this.nY - this.nSize / 2) + 'px';
         //}
+
+        if( Math.abs(car.nX-this.nX) <= car.nSize/4 && Math.abs(car.nY-this.nY) <= this.nSize){
+            car.Crash();
+        }
 
     }
     constructor(x: number, y: number, size: number){

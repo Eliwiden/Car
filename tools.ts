@@ -9,3 +9,20 @@ function CreateObj(x: number, y: number, size: number, sClassName: string, sInne
     document.body.append(dom);//Добавляем сегмент в тело документа
     return dom;//Возвращаем созданный элемент
 }
+
+function CalcNextX(x: number, max: number){
+    const OBSTACLE_OFFSET = 30;
+    x += -OBSTACLE_OFFSET + Math.random()*OBSTACLE_OFFSET*2;
+    if(x<0){
+        x = 0;
+    }else if(x>max){
+        x = max;
+    }
+    return x;
+}
+
+function EndGame(){
+    clearTimeout(idObstacle);
+    clearTimeout(idCoins);
+    window.onkeydown = null;
+}

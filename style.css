@@ -23,3 +23,7 @@ body{
 .Obstacle{
    position: absolute;
 }
+
+.CrashCar > svg > rect{
+    fill: red;
+}

@@ -81,4 +81,17 @@ class CCoins extends CScreenObject{
     constructor(x: number, y: number, size: number){
         super(x, y, size, ()=>{return CreateObj(x, y, size, "Coin", "<br>BTC")});
     }
-}
+
+    IsObjectIn(car: CCar){
+        if(Math.abs(car.nX - this.nX) - (this.nSize/2 + car.nSize/2) < 0 &&
+            Math.abs(car.nY - this.nY) - (this.nSize/2 + car.nSize/2) < 0){
+                return true;
+            }else{
+                return false
+            }
+            
+        }
+        Dissapear(){
+            this.dom.remove();
+        }
+    }

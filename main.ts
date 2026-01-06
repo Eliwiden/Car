@@ -14,30 +14,29 @@ const obstacleSize = 20;
 const speed = 30;
 let bObstacleEnough = false;
 let x = 100;
-let x2 = x + 300;
+
 let idObstacle = setInterval(()=>{
     const fieldRect = document.body.getBoundingClientRect();
+
     if(!bObstacleEnough){
         createObstacle(x);
-        createObstacle(x2);
+        createObstacle(x + 300);
         x = CalcNextX(x, fieldRect.right);
-        x2 = CalcNextX(x2, fieldRect.right);
     }
 
     for(let i = aObstacles.length - 1; i >= 0; i--){
         const obstacle = aObstacles[i];
         obstacle.Fall(speed, car);
-        
+
         if(obstacle.nY > fieldRect.bottom){
             bObstacleEnough = true;
             obstacle.Fall(-fieldRect.height-150, car);
-            if(Math.abs(obstacle.nX - x) < Math.abs(obstacle.nX - x2)){
+            if((obstacle.nX-x)%300 == 0){
                 obstacle.setX(x);
-                x = CalcNextX(x, fieldRect.right);
             }else{
-                obstacle.setX(x2);
-                x2 = CalcNextX(x2, fieldRect.right);
+                obstacle.setX(x + 300);
             }
+            x = CalcNextX(x, fieldRect.right);
         }
     }
 
@@ -55,6 +54,18 @@ let idCoins = setInterval(()=>{
         aCoins.splice(0,1);
     }
 }, 1000)
+
+setInterval(()=>{
+    const fieldRect = document.body.getBoundingClientRect();
+    for(let i = aCoins.length - 1; i >= 0; i--){
+        const coin = aCoins[i];
+        if(coin.IsObjectIn(car)){
+            coin.Dissapear();
+            aCoins.splice(i, 1);
+        }
+    }
+}, 100);
+
 
 window.onkeydown=(e:KeyboardEvent) =>{
     e.preventDefault()

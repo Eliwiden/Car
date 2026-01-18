@@ -9,15 +9,14 @@ function CreateObj(x: number, y: number, size: number, sClassName: string, sInne
     document.body.append(dom);//Добавляем сегмент в тело документа
     return dom;//Возвращаем созданный элемент
 }
-
-function CalcNextX(x: number, max: number){
-    const OBSTACLE_OFFSET = 30;
-    x += -OBSTACLE_OFFSET + Math.random()*OBSTACLE_OFFSET*2;
-    if(x<0){
-        x = 0;
-    }else if(x>max){
-        x = max;
+//Math.abs(car.nX-this.nX) <= car.nSize/4 && Math.abs(car.nY-this.nY) <= this.nSize
+function CalcNextX(x: number){
+    const OBSTACLE_OFFSET = 10;
+    if(oGlobData.nRoadGoal < 0 || Math.abs(x-oGlobData.nRoadGoal)<=OBSTACLE_OFFSET){
+        oGlobData.nRoadGoal = Math.random()*(document.documentElement.clientWidth-ROAD_WIDTH);       
     }
+    const sign = Math.sign(oGlobData.nRoadGoal - x);
+    x += OBSTACLE_OFFSET*sign;
     return x;
 }
 

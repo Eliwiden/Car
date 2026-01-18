@@ -14,29 +14,31 @@ const obstacleSize = 20;
 const speed = 30;
 let bObstacleEnough = false;
 let x = 100;
+const ROAD_WIDTH = 500;
+let coinCount = 0;
 
 let idObstacle = setInterval(()=>{
     const fieldRect = document.body.getBoundingClientRect();
 
     if(!bObstacleEnough){
         createObstacle(x);
-        createObstacle(x + 300);
-        x = CalcNextX(x, fieldRect.right);
+        createObstacle(x + ROAD_WIDTH, true);
+        x = CalcNextX(x);
     }
 
     for(let i = aObstacles.length - 1; i >= 0; i--){
         const obstacle = aObstacles[i];
         obstacle.Fall(speed, car);
+        const obstacleR = aObstacles[i];
+        obstacleR.Fall(speed, car);
 
         if(obstacle.nY > fieldRect.bottom){
             bObstacleEnough = true;
             obstacle.Fall(-fieldRect.height-150, car);
-            if((obstacle.nX-x)%300 == 0){
-                obstacle.setX(x);
-            }else{
-                obstacle.setX(x + 300);
-            }
-            x = CalcNextX(x, fieldRect.right);
+            obstacleR.Fall(-fieldRect.height-150, car);
+            obstacle.setX(x);
+            obstacleR.setX(x + ROAD_WIDTH);
+            x = CalcNextX(x);
         }
     }
 
@@ -78,3 +80,4 @@ window.onkeydown=(e:KeyboardEvent) =>{
 }
 
 const car = new CCar(document.documentElement.clientWidth/2, document.documentElement.clientHeight/2, 100);
+const oGlobData = new CGlobData();

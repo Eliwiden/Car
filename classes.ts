@@ -36,14 +36,10 @@ class CCar extends CScreenObject{
 }
 
 class CObstacle extends CScreenObject{
-    Fall(step: number, car: CCar) {
-        //const item = this.dom.getBoundingClientRect();
-        //const fieldRect = document.getElementById('field')!.getBoundingClientRect();
+    Fall(step: number, car: CCar){
 
-        //if (item.bottom + step <= fieldRect.bottom + 100) {
-            this.nY += step;
-            this.dom.style.top = (this.nY - this.nSize / 2) + 'px';
-        //}
+        this.nY += step;
+        this.dom.style.top = (this.nY - this.nSize / 2) + 'px';
 
         if( Math.abs(car.nX-this.nX) <= car.nSize/4 && Math.abs(car.nY-this.nY) <= this.nSize){
             car.Crash();
@@ -59,14 +55,19 @@ class CObstacle extends CScreenObject{
     }
 }
 const aObstacles: CObstacle[]=[];//Создаём пустой массив монет
+const aObstaclesR: CObstacle[]=[];
 
-function createObstacle(x: number){
-    const fieldRect = document.getElementById('field')!.getBoundingClientRect();
+function createObstacle(x: number, bObstacleR?: boolean){
     const y = -100;
     const size = obstacleSize;
     
     const obstacle = new CObstacle(x, y, size);
-    aObstacles.push(obstacle);
+    if(bObstacleR){
+        aObstaclesR.push(obstacle);
+    }else{
+        aObstacles.push(obstacle);
+    }
+    
 }
 
 class CCoins extends CScreenObject{
@@ -95,3 +96,7 @@ class CCoins extends CScreenObject{
             this.dom.remove();
         }
     }
+
+class CGlobData{
+    nRoadGoal=-1;
+}

@@ -58,7 +58,7 @@ const aObstacles: CObstacle[]=[];//Создаём пустой массив мо
 const aObstaclesR: CObstacle[]=[];
 
 function createObstacle(x: number, bObstacleR?: boolean){
-    const y = -100;
+    const y = -obstacleSize;
     const size = obstacleSize;
     
     const obstacle = new CObstacle(x, y, size);
@@ -72,12 +72,12 @@ function createObstacle(x: number, bObstacleR?: boolean){
 
 class CCoins extends CScreenObject{
     Fall(step: number){
-        const item = this.dom.getBoundingClientRect();
+        /*const item = this.dom.getBoundingClientRect();
         const oItem = document.getElementById('field')!.getBoundingClientRect();//Получаем размер и позицию границы поля относительно окна
-        if(item.bottom + step <= oItem.bottom && item.left + step >= oItem.left){
+        if(item.bottom + step <= oItem.bottom && item.left + step >= oItem.left){*/
             this.nY += step;//Меняем виртуальное положение
             this.dom.style.top = (this.nY-this.nSize/2) + 'px';//Обновляем позицию DOM элемента по X
-        }
+        //}
     }
     constructor(x: number, y: number, size: number){
         super(x, y, size, ()=>{return CreateObj(x, y, size, "Coin", "<br>BTC")});

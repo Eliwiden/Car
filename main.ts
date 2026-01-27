@@ -17,6 +17,22 @@ let nGlobX = 100;
 const ROAD_WIDTH = 500;
 const COIN_SIZE = 50;
 let coinCount = 0;
+let coinCounterDom: HTMLDivElement;
+
+function createCoinCounter(){
+    coinCounterDom = CreateObj(50, 50, 60, "CoinCounter", `BTC<br>${coinCount}`);
+    //return coinCounterDom;
+}
+
+function updateCoinCounter(){
+    if (coinCounterDom){
+        coinCounterDom.innerHTML = `BTC<br>${coinCount}`;
+    }
+}
+
+createCoinCounter();
+
+//const coinCounterDom = createCoinCounter();
 
 let idObstacle = setInterval(()=>{
     const fieldRect = document.body.getBoundingClientRect();
@@ -47,7 +63,9 @@ let idObstacle = setInterval(()=>{
         aCoins[i].Fall(speed);
     }
 
-}, 100)
+}, 80)
+
+createCoinCounter();
 
 const aCoins: CCoins[]=[];//Создаём пустой массив монет
 
@@ -67,8 +85,10 @@ setInterval(()=>{
     for(let i = aCoins.length - 1; i >= 0; i--){
         const coin = aCoins[i];
         if(coin.IsObjectIn(car)){
+            coinCount++;
             coin.Dissapear();
             aCoins.splice(i, 1);
+            updateCoinCounter();
         }
     }
 }, 100);

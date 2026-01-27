@@ -7,6 +7,20 @@ body{
     border: solid 4px black;
 }
 
+.CoinCounter {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.6);
+    color: gold;
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center;
+    border: 2px solid gold;
+    border-radius: 10px;
+}
+
 .CCar{
    position: absolute;
 }

@@ -75,7 +75,7 @@ class CCoins extends CScreenObject{
         /*const item = this.dom.getBoundingClientRect();
         const oItem = document.getElementById('field')!.getBoundingClientRect();//Получаем размер и позицию границы поля относительно окна
         if(item.bottom + step <= oItem.bottom && item.left + step >= oItem.left){*/
-            this.nY += step;//Меняем виртуальное положение
+            this.nY += step //+ 25;//Меняем виртуальное положение
             this.dom.style.top = (this.nY-this.nSize/2) + 'px';//Обновляем позицию DOM элемента по X
         //}
     }
@@ -84,7 +84,7 @@ class CCoins extends CScreenObject{
     }
 
     IsObjectIn(car: CCar){
-        if(Math.abs(car.nX - this.nX) - (this.nSize/2 + car.nSize/2) < 0 &&
+        if(Math.abs(car.nX - this.nX) - (this.nSize/2 + car.nSize/2) < 0 && //Коллизия монеты с машиной
             Math.abs(car.nY - this.nY) - (this.nSize/2 + car.nSize/2) < 0){
                 return true;
             }else{

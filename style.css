@@ -5,6 +5,7 @@ body{
     height: calc(100%-10px);
     background-color: white;
     border: solid 4px black;
+    overflow: hidden;
 }
 
 .CoinCounter {
@@ -38,6 +39,6 @@ body{
    position: absolute;
 }
 
-.CrashCar > svg > rect{
+.CrashCar > svg > #corpe{
     fill: red;
 }

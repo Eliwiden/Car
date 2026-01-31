@@ -11,7 +11,7 @@ function CreateObj(x: number, y: number, size: number, sClassName: string, sInne
 }
 //Math.abs(car.nX-this.nX) <= car.nSize/4 && Math.abs(car.nY-this.nY) <= this.nSize
 function CalcNextX(x: number){
-    const OBSTACLE_OFFSET = 10;
+    const OBSTACLE_OFFSET = 15;//10
     if(oGlobData.nRoadGoal < 0 || Math.abs(x-oGlobData.nRoadGoal)<=OBSTACLE_OFFSET){
         oGlobData.nRoadGoal = Math.random()*(document.documentElement.clientWidth-ROAD_WIDTH);       
     }

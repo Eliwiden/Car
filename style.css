@@ -3,7 +3,7 @@ body{
     padding: 0;
     width: calc(100%-10px);
     height: calc(100%-10px);
-    background-color: white;
+    background-color: gray;
     border: solid 4px black;
     overflow: hidden;
 }
@@ -35,8 +35,16 @@ body{
     border-radius: 50%;
 }
 
-.Obstacle{
+/*.Obstacle{
    position: absolute;
+}
+
+.Pit{
+    position: absolute;
+}*/
+
+.pos_abs{
+    position: absolute;
 }
 
 .CrashCar > svg > #corpe{

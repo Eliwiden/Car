@@ -18,6 +18,7 @@ class CScreenObject{
 
 class CCar extends CScreenObject{
     nDurability=100;
+    durabilityCounterDom = CreateObj(120, 50, 60, "DurabilityCounter pos_abs", `HP: ${this.nDurability}`) as HTMLDivElement;
     Move(step: number){
         const rect = this.dom.getBoundingClientRect();//Получаем текущую позицию слева у элемента относительно окна
         const oRect = document.getElementById('field')!.getBoundingClientRect();//Получаем размер и позицию границы поля относительно окна
@@ -28,6 +29,19 @@ class CCar extends CScreenObject{
     }
     constructor(x: number, y: number, size: number){
         super(x, y, size, ()=>{return CreateObj(x, y, size, "CCar", ravSvgCar)});
+    }
+    updateDurabilityCounter(){
+        this.nDurability-=10;
+        if(this.durabilityCounterDom){
+            this.durabilityCounterDom.innerHTML=`HP${this.nDurability}`;
+            if(this.nDurability > 50){
+                this.durabilityCounterDom.style.color = "#00FF00";
+            }else if (this.nDurability > 20){
+                this.durabilityCounterDom.style.color = "#FFFF00";
+            }else{
+                this.durabilityCounterDom.style.color = "#FF0000";
+            } 
+        }
     }
 
     Crash(){
@@ -48,7 +62,7 @@ class CObstacle extends CScreenObject{
 
     }
     constructor(x: number, y: number, size: number){
-        super(x, y, size, ()=>{return CreateObj(x, y, size, "Obstacle", ravSvgObst)});
+        super(x, y, size, ()=>{return CreateObj(x, y, size, "Obstacle pos_abs", ravSvgObst)});
     }
     setX(x: number){
         this.nX = x;
@@ -81,7 +95,7 @@ class CCoins extends CScreenObject{
         //}
     }
     constructor(x: number, y: number, size: number){
-        super(x, y, size, ()=>{return CreateObj(x, y, size, "Coin", "<br>BTC")});
+        super(x, y, size, ()=>{return CreateObj(x, y, size, "Coin pos_abs", "<br>BTC")});
     }
 
     IsObjectIn(car: CCar){
@@ -108,7 +122,7 @@ class CCoins extends CScreenObject{
         //}
     }
     constructor(x: number, y: number, size: number){
-        super(x, y, size, ()=>{return CreateObj(x, y, size, "Pit", ravSvgPit)});
+        super(x, y, size, ()=>{return CreateObj(x, y, size, "Pit pos_abs", ravSvgPit)});
     }
 
     IsObjectIn(car: CCar){

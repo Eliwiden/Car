@@ -9,8 +9,8 @@ const ravSvgObst = `<svg viewBox="0 0 100 100">
                 </svg>`
 
 const ravSvgPit = `<svg viewBox="0 0 100 100">
-                    <rect x="25" y="0" width="50" height="100" rx="10" ry="10" 
-                        fill="grey" stroke="black" stroke-width="2" />
+                    <rect x="25" y="0" width="100" height="100" rx="10" ry="10" 
+                        fill="saddlebrown" stroke="brown" stroke-width="2" />
                 </svg>`
 
 /*
@@ -66,6 +66,7 @@ let bObstacleEnough = false;
 let nGlobX = 100;
 const ROAD_WIDTH = 500;//easy: 500 medium: 300
 const COIN_SIZE = 50;
+const PIT_SIZE = 100;
 let coinCount = 0;
 let coinCounterDom: HTMLDivElement;
 
@@ -74,6 +75,7 @@ function createCoinCounter(){
     //return coinCounterDom;
 }
 
+
 function updateCoinCounter(){
     if (coinCounterDom){
         coinCounterDom.innerHTML = `BTC<br>${coinCount}`;
@@ -81,7 +83,6 @@ function updateCoinCounter(){
 }
 
 createCoinCounter();
-
 //const coinCounterDom = createCoinCounter();
 
 let idObstacle = setInterval(()=>{
@@ -92,9 +93,21 @@ let idObstacle = setInterval(()=>{
         createObstacle(nGlobX + ROAD_WIDTH, true);
         nGlobX = CalcNextX(nGlobX);
     }
+    /*if(oPit){
+        oPit.Fall(speed);
+    }*/
     if(oPit){
         oPit.Fall(speed);
+        if(oPit.IsObjectIn(car)){ 
+            car.updateDurabilityCounter(); 
+            oPit.Dissapear(); 
+            oPit = null; 
+        }else if(oPit.nY > fieldRect.bottom){
+            oPit.Dissapear(); 
+            oPit = null; 
+        }
     }
+
     for(let i = aObstacles.length - 1; i >= 0; i--){
         const obstacle = aObstacles[i];
         obstacle.Fall(speed, car);
@@ -147,15 +160,6 @@ setInterval(()=>{
 
 let oPit: CPit | null = null;
 let nDelayPit = 10;
-setTimeout(()=>{
-    if(oPit){
-        oPit.Dissapear();
-    }
-    const x = Math.random()*(ROAD_WIDTH-COIN_SIZE*2)+nGlobX+COIN_SIZE;//2
-    const y = COIN_SIZE/2;
-    oPit = new CPit(x,y,COIN_SIZE);
-    nDelayPit = Math.random()*(17)+3;
-}, nDelayPit*1000);
 
 window.onkeydown=(e:KeyboardEvent) =>{
     e.preventDefault()
@@ -169,3 +173,18 @@ window.onkeydown=(e:KeyboardEvent) =>{
 
 const car = new CCar((nGlobX+ROAD_WIDTH)/2, document.documentElement.clientHeight*0.9, 100);
 const oGlobData = new CGlobData();
+
+setInterval(() => {//Тут игры с НЕИРОНКОЙ, потому что сложно
+    const fieldRect = document.body.getBoundingClientRect();
+    
+    if(!oPit){
+        // Создаем новую яму
+        const x: number = Math.random() * (ROAD_WIDTH - PIT_SIZE * 2) + nGlobX + PIT_SIZE;
+        const y: number = -PIT_SIZE;
+        oPit = new CPit(x, y, PIT_SIZE);
+        nDelayPit = Math.random() * 5 + 1; // Следующая через 3-20 сек 17+3
+    }        
+            
+    // Эффект тряски машины при попадании (опционально)
+    //car.nY += Math.sin(Date.now() * 0.01) * 3;    
+}, nDelayPit*1000);

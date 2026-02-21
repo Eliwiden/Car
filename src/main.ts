@@ -1,14 +1,17 @@
-const ravSvg = `<svg viewBox="0 0 100 100">
+import { CalcNextX, CreateObj } from "./tools";
+import {createObstacle, aObstacles, aObstaclesR, CCoins, CPit, CCar, CGlobData} from './classes'
+
+export const ravSvg = `<svg viewBox="0 0 100 100">
                     <rect x="25" y="0" width="50" height="100" rx="10" ry="10" 
                         fill="black" stroke="grey" stroke-width="2" />
                 </svg>`
 
-const ravSvgObst = `<svg viewBox="0 0 100 100">
+export const ravSvgObst = `<svg viewBox="0 0 100 100">
                     <rect x="25" y="0" width="50" height="100" rx="10" ry="10" 
                         fill="orange" stroke="yellow" stroke-width="2" />
                 </svg>`
 
-const ravSvgPit = `<svg viewBox="0 0 100 100">
+export const ravSvgPit = `<svg viewBox="0 0 100 100">
                     <rect x="25" y="0" width="100" height="100" rx="10" ry="10" 
                         fill="saddlebrown" stroke="brown" stroke-width="2" />
                 </svg>`
@@ -34,7 +37,7 @@ const ravSvgCar = `<svg width="100" height="100" viewBox="0 0 100 150" xmlns="ht
                         <rect x="30" y="55" width="40" height="35" rx="5" fill="#555" />
                     </svg>`*/
 
-const ravSvgCar = `<svg width="56" height="101" viewBox="0 0 56 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+export const ravSvgCar = `<svg width="56" height="101" viewBox="0 0 56 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="6.1" y="0.1" width="6.8" height="6.8" rx="3.4" fill="#FCFF34"/>
                         <rect x="6.1" y="0.1" width="6.8" height="6.8" rx="3.4" stroke="black" stroke-width="0.2"/>
                         <rect x="6.1" y="0.1" width="6.8" height="6.8" rx="3.4" stroke="black" stroke-width="0.2"/>
@@ -60,11 +63,11 @@ const ravSvgCar = `<svg width="56" height="101" viewBox="0 0 56 101" fill="none"
 //100 on 150 is also a good width to heigth
 //const x = Math.random()*(document.documentElement.clientWidth - 200)+100;
 //const y = Math.random()*(document.documentElement.clientHeight - 200)+100;
-const obstacleSize = 20;
+export const obstacleSize = 20;
 const speed = 30;//easy: 30 medium: 50
 let bObstacleEnough = false;
 let nGlobX = 100;
-const ROAD_WIDTH = 500;//easy: 500 medium: 300
+export const ROAD_WIDTH = 500;//easy: 500 medium: 300
 const COIN_SIZE = 50;
 const PIT_SIZE = 100;
 let coinCount = 0;
@@ -85,7 +88,7 @@ function updateCoinCounter(){
 createCoinCounter();
 //const coinCounterDom = createCoinCounter();
 
-let idObstacle = setInterval(()=>{
+export let idObstacle = setInterval(()=>{
     const fieldRect = document.body.getBoundingClientRect();
 
     if(!bObstacleEnough){
@@ -134,7 +137,7 @@ createCoinCounter();
 
 const aCoins: CCoins[]=[];//Создаём пустой массив монет
 
-let idCoins = setInterval(()=>{
+export let idCoins = setInterval(()=>{
     //Генерим случайную координату для еды
         const x = Math.random()*(ROAD_WIDTH-COIN_SIZE*2)+nGlobX+COIN_SIZE;//2
         const y = COIN_SIZE/2;
@@ -172,7 +175,7 @@ window.onkeydown=(e:KeyboardEvent) =>{
 }
 
 const car = new CCar((nGlobX+ROAD_WIDTH)/2, document.documentElement.clientHeight*0.9, 100);
-const oGlobData = new CGlobData();
+export const oGlobData = new CGlobData();
 
 setInterval(() => {//Тут игры с НЕИРОНКОЙ, потому что сложно
     const fieldRect = document.body.getBoundingClientRect();

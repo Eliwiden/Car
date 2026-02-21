@@ -1,4 +1,11 @@
-function CreateObj(x: number, y: number, size: number, sClassName: string, sInnerHTML: string){//Создаём сегмент змейки
+import{
+    oGlobData,
+    idObstacle,
+    idCoins,
+    ROAD_WIDTH
+
+}from './main'
+export function CreateObj(x: number, y: number, size: number, sClassName: string, sInnerHTML: string){//Создаём сегмент змейки
     const dom = document.createElement('div');//Создаём контейнер div
     dom.className = sClassName;//Присваиваем класс для стилей
     dom.style.top = (y - size/2) + 'px';//Позиция по вертикали
@@ -10,7 +17,7 @@ function CreateObj(x: number, y: number, size: number, sClassName: string, sInne
     return dom;//Возвращаем созданный элемент
 }
 //Math.abs(car.nX-this.nX) <= car.nSize/4 && Math.abs(car.nY-this.nY) <= this.nSize
-function CalcNextX(x: number){
+export function CalcNextX(x: number){
     const OBSTACLE_OFFSET = 15;//10
     if(oGlobData.nRoadGoal < 0 || Math.abs(x-oGlobData.nRoadGoal)<=OBSTACLE_OFFSET){
         oGlobData.nRoadGoal = Math.random()*(document.documentElement.clientWidth-ROAD_WIDTH);       
@@ -20,7 +27,7 @@ function CalcNextX(x: number){
     return x;
 }
 
-function EndGame(){
+export function EndGame(){
     clearTimeout(idObstacle);
     clearTimeout(idCoins);
     window.onkeydown = null;

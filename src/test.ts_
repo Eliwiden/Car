@@ -1,0 +1,159 @@
+// ФИКСИРОВАННЫЕ 10 УРОВНЕЙ с прогрессией сложности
+/*const LEVELS = [
+    { lvl: 1,  speed: 20, coinsNeeded:  8, coinInterval: 1400, obstacleInterval: 120, pitDelay: 8,  name: "Viegls" },
+    { lvl: 2,  speed: 25, coinsNeeded:  9, coinInterval: 1300, obstacleInterval: 110, pitDelay: 7.5, name: "Viegls+" },
+    { lvl: 3,  speed: 30, coinsNeeded: 10, coinInterval: 1200, obstacleInterval: 100, pitDelay: 7,  name: "Vidējs" },
+    { lvl: 4,  speed: 35, coinsNeeded: 11, coinInterval: 1100, obstacleInterval: 90,  pitDelay: 6.5, name: "Vidējs+" },
+    { lvl: 5,  speed: 40, coinsNeeded: 12, coinInterval: 1000, obstacleInterval: 80,  pitDelay: 6,  name: "Grūti" },
+    { lvl: 6,  speed: 48, coinsNeeded: 14, coinInterval: 850,  obstacleInterval: 70,  pitDelay: 5.5, name: "Grūti+" }, 
+    { lvl: 7,  speed: 55, coinsNeeded: 16, coinInterval: 750,  obstacleInterval: 65,  pitDelay: 5,  name: "Ļoti Grūti" },
+    { lvl: 8,  speed: 62, coinsNeeded: 18, coinInterval: 650,  obstacleInterval: 60,  pitDelay: 4.5, name: "Meistars" },
+    { lvl: 9,  speed: 70, coinsNeeded: 20, coinInterval: 550,  obstacleInterval: 50,  pitDelay: 4,  name: "Leģenda" },
+    { lvl: 10, speed: 80, coinsNeeded: 25, coinInterval: 450,  obstacleInterval: 40,  pitDelay: 3,  name: "BOSS" }
+];
+
+let currentLevel = 1; // Текущий уровень (1-10)
+let maxLevel = 10; // Максимум уровней
+
+// Получить настройки текущего уровня
+function getCurrentLevelSettings() {
+    return LEVELS[currentLevel - 1];
+}
+
+// Инициализация дисплеев
+function initDisplays() {
+    createCoinCounter();
+    createLevelDisplay();
+    updateAllDisplays();
+}
+
+function updateAllDisplays() {
+    updateCoinCounter();
+    updateLevelDisplay();
+    car.updateDurabilityCounter();
+}
+
+// Обновленный счетчик уровня
+function updateLevelDisplay() {
+    const settings = getCurrentLevelSettings();
+    if (levelDisplayDom) {
+        levelDisplayDom.innerHTML = `${settings.name}<br>LVL ${currentLevel}/${maxLevel}`;
+        // Цвета по сложности
+        const colors = ['#00FF00', '#00CC00', '#00FF00', '#CCCC00', '#FF6600', '#FF4400', '#FF0000', '#CC0000', '#FF0000', '#8B0000'];
+        levelDisplayDom.style.color = colors[currentLevel - 1];
+    }
+}
+
+// Завершение текущего уровня → следующий
+function completeLevel() {
+    EndGame();
+    
+    const settings = getCurrentLevelSettings();
+    const completeMsg = CreateObj(
+        (nGlobX + ROAD_WIDTH/2), 200, 250, "LevelComplete pos_abs", 
+        `<h2>🎉 LVL ${currentLevel} PABEIGTS! 🎉</h2>
+         Savācāt ${coinCount}/${settings.coinsNeeded} BTC<br>
+         <strong>${settings.name}</strong><br><br>
+         ${currentLevel < maxLevel ? 
+            `<button onclick="nextLevel()">→ LVL ${currentLevel+1}</button>` : 
+            `<h3>🏆 Šī ir pēdējā līmenis! 🏆</h3><button onclick="restartGame()">SĀKT NO JAUNA</button>`
+         }`
+    );
+    
+    completeMsg.style.background = "linear-gradient(45deg, gold, orange)";
+    completeMsg.style.border = "4px solid #FFD700";
+    completeMsg.style.borderRadius = "20px";
+    completeMsg.style.fontSize = "20px";
+    completeMsg.style.padding = "25px";
+    completeMsg.style.textShadow = "2px 2px 4px rgba(0,0,0,0.5)";
+}
+
+// Переход на следующий уровень
+function nextLevel() {
+    currentLevel++;
+    
+    // Очистка
+    clearGameObjects();
+    resetGameState();
+    
+    updateAllDisplays();
+    document.querySelector('.LevelComplete')?.remove();
+    
+    // Запуск с настройками нового уровня
+    startLevelWithSettings(getCurrentLevelSettings());
+}
+
+// Очистка объектов
+function clearGameObjects() {
+    aCoins.forEach(coin => coin.Dissapear()); aCoins.length = 0;
+    aObstacles.forEach(obs => obs.Dissapear()); aObstacles.length = 0;
+    aObstaclesR.forEach(obs => obs.Dissapear()); aObstaclesR.length = 0;
+    if (oPit) { oPit.Dissapear(); oPit = null; }
+}
+
+// Сброс состояния игры
+function resetGameState() {
+    coinCount = 0;
+    car.nDurability = 100;
+    bObstacleEnough = false;
+    nGlobX = 100;
+    car.nX = (nGlobX + ROAD_WIDTH) / 2;
+    car.dom.style.left = (car.nX - car.nSize/2) + 'px';
+}
+
+// Запуск уровня с конкретными настройками
+function startLevelWithSettings(settings: any) {
+    const speed = settings.speed;
+    const coinInterval = settings.coinInterval;
+    const obstacleInterval = settings.obstacleInterval;
+    const pitDelay = settings.pitDelay * 1000;
+    
+    // Препятствия
+    idObstacle = setInterval(() => {
+        const fieldRect = document.body.getBoundingClientRect();
+        // ... (тот же код препятствий, но со скоростью settings.speed)
+        // Вставить сюда логику из оригинального idObstacle
+    }, obstacleInterval);
+    
+    // Монетки
+    idCoins = setInterval(() => {
+        const x = Math.random()*(ROAD_WIDTH-COIN_SIZE*2)+nGlobX+COIN_SIZE;
+        const y = COIN_SIZE/2;
+        aCoins.push(new CCoins(x, y, COIN_SIZE));
+        if(aCoins.length > Math.max(2, 5-settings.lvl)){
+            aCoins[0].Dissapear();
+            aCoins.splice(0,1);
+        }
+    }, coinInterval);
+    
+    // Ямы с новым интервалом
+    setInterval(() => {
+        if(!oPit){
+            const x = Math.random() * (ROAD_WIDTH - PIT_SIZE * 2) + nGlobX + PIT_SIZE;
+            oPit = new CPit(x, -PIT_SIZE, PIT_SIZE);
+        }
+    }, pitDelay);
+}
+
+// Инициализация (в самом начале main.ts)
+initDisplays();
+
+// Проверка монет (обновленная)
+setInterval(()=>{
+    for(let i = aCoins.length - 1; i >= 0; i--){
+        const coin = aCoins[i];
+        if(coin.IsObjectIn(car)){
+            coinCount++;
+            coin.Dissapear();
+            aCoins.splice(i, 1);
+            updateCoinCounter();
+            
+            // ПРОВЕРКА ЗАВЕРШЕНИЯ УРОВНЯ
+            const settings = getCurrentLevelSettings();
+            if(coinCount >= settings.coinsNeeded) {
+                completeLevel();
+                return;
+            }
+        }
+    }
+}, 100)*/

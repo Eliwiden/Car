@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liepājas Spēle</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(to bottom, #87CEEB, #98FB98); 
+            margin: 0; 
+            padding: 20px; 
+            text-align: center; 
+        }
+        .screen { display: none; min-height: 100vh; }
+        .active { display: block; }
+        h1 { color: #4169E1; font-size: 2.5em; }
+        button { 
+            background: #32CD32; 
+            color: white; 
+            border: none; 
+            padding: 15px 30px; 
+            font-size: 18px; 
+            margin: 10px; 
+            cursor: pointer; 
+            border-radius: 10px; 
+        }
+        button:hover { background: #228B22; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .back-btn {
+            background: #4169E1 !important;
+            margin-top: 20px;
+        }
+        .back-btn:hover {
+            background: #1E90FF !important;
+        }
+        .modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.8); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal-content { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            max-width: 600px; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+        }
+        .locations { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 15px; 
+            margin-top: 20px; 
+        }
+        .location { 
+            background: #FFD700; 
+            padding: 20px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: transform 0.2s; 
+            text-decoration: none;
+            color: black;
+            display: block;
+        }
+        .location:hover:not(.visited) { 
+            transform: scale(1.05); 
+            background: #FFA500; 
+        }
+        .visited { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            pointer-events: none;
+        }
+        .game-complete {
+            background: linear-gradient(45deg, #FFD700, #FF8C00) !important;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .group-header { 
+            font-weight: bold; 
+            color: #4169E1; 
+            grid-column: 1 / -1; 
+            margin: 20px 0 10px; 
+        }
+        .score { 
+            font-size: 24px; 
+            color: #FF4500; 
+            margin: 20px; 
+        }
+        .external-link {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .quiz-container {
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .quiz-question {
+            background: #f0f8ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #4169E1;
+        }
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .quiz-option {
+            padding: 12px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover {
+            background: #e6f3ff;
+            border-color: #4169E1;
+        }
+        .quiz-option.correct {
+            background: #d4edda !important;
+            border-color: #28a745 !important;
+        }
+        .quiz-option.incorrect {
+            background: #f8d7da !important;
+            border-color: #dc3545 !important;
+        }
+        .quiz-progress {
+            background: #eee;
+            height: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .quiz-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #32CD32, #FFD700);
+            transition: width 0.3s;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Titulkadrs -->
+<div id="titleScreen" class="screen active">
+    <h1>🌊 Liepājas Spēle 🌊</h1>
+    <p>Autors: Jelisejs Cvetkovs</p>
+    <p>Uzaicinājums: Iespied "Sākt spēli" vai <strong>Enter</strong>, lai sāktu!</p>
+    <p>Vai spied <strong>P</strong> par "Par spēli"</p>
+    <button onclick="startGame()">Sākt spēli</button>
+    <button onclick="showAbout()">Par spēli</button>
+</div>
+
+<!-- Par spēli modāls -->
+<div id="aboutModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h2>Par spēli</h2>
+        <p><strong>Noteikumi:</strong> Noklikšķini uz visām 10 vietām Liepājā + pabeidz KVIZ!</p>
+        <p><strong>Mērķis:</strong> Savāc 200 punktus (10 vietas × 10 + kviz 100)!</p>
+        <p><strong>Fināls:</strong> Tikai pēc visu lokāciju + kviza pabeigšanas!</p>
+        <hr>
+        <p><strong>Komanda:</strong> Jelisejs Cvetkovs (kodētājs)</p>
+        <p><strong>Tehnoloģijas:</strong> HTML, CSS, JavaScript, TypeScript</p>
+        <p><strong>Avoti:</strong> GitHub, StackOverflow, Reddit</p>
+        <hr>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <button onclick="closeAboutAndStart()" style="flex: 1; min-width: 200px;">Sākt spēli</button>
+            <button class="back-btn" onclick="closeAbout()" style="flex: 1; min-width: 200px;">Atpakaļ uz sākuma ekrānu</button>
+        </div>
+        <p style="font-size: 14px; color: #666; margin-top: 15px;">
+            (Esc - aizvērt | Enter - sākt)
+        </p>
+    </div>
+</div>
+
+<!-- Vietu saraksts -->
+<div id="locationsScreen" class="screen">
+    <h2>Izvēlies apmeklējuma vietu Liepājā</h2>
+    <div id="locationsList" class="locations"></div>
+    <div class="score" id="scoreDisplay">Punkti: 0</div>
+    <button onclick="showTitle()">Atpakaļ</button>
+</div>
+
+<div id="quizScreen" class="screen">
+    <h2>🧠 Kviz par Liepāju!</h2>
+    <div class="score" id="quizScoreDisplay">Punkti: <span id="currentQuizScore">0</span>/100</div>
+    <div id="quizContainer" class="quiz-container"></div>
+    <div class="quiz-progress">
+        <div class="quiz-progress-fill" id="quizProgress" style="width: 0%"></div>
+    </div>
+    <button id="quizCompleteBtn" onclick="completeQuiz()" style="display:none;">Pabeigt kvizu!</button>
+    <button onclick="backToLocations()">Atpakaļ uz lokācijām</button>
+</div>
+
+<!-- Fināls -->
+<div id="finalScreen" class="screen">
+    <h1>🎉 PILNĪGI IZSPĒLĒTS! 🏆</h1>
+    <p id="finalScore"></p>
+    <button onclick="restartGame()">Spēlēt vēlreiz</button>
+</div>
+
+<script>
+    let score = 0;
+    let visited = new Set();
+    let quizCompleted = false;
+    let quizScore = 0;
+    let currentQuizQuestion = 0;
+    
+    const locations = [
+        { id: 'muzejs', name: '🖼️ Liepājas muzejs', group: 'a) Kultūrvēsturiskas vietas', url: 'level_1.html' },
+        { id: 'teatris', name: '🎭 Liepājas teātris', group: 'a) Kultūrvēsturiskas vietas', url: 'level_2.html' },
+        { id: 'baznica', name: '⛪ Sv. Trīsvienības baznīca', group: 'a) Kultūrvēsturiskas vietas', url: 'level_3.html' },
+        { id: 'piemineklis', name: '⚓ Piemineklis bojā gājušajiem jūrniekiem un zvejniekiem', group: 'b) Pieminekļi', url: 'level_4.html' },
+        { id: 'elizabetes', name: '🎬 Elizabetes iela', group: 'c) Brīvdabas objekti', url: 'level_5.html' },
+        { id: 'rtu', name: '🎓 RTU Liepāja', group: 'd) Izglītība', url: 'level_6.html' },
+        { id: 'metalurgs', name: '🏭 Liepājas Metalurgs', group: 'e) Uzņēmumi', url: 'level_7.html' },
+        { id: 'osts', name: '⚓ Liepājas osta', group: 'e) Uzņēmumi', url: 'level_8.html' },
+        { id: 'parks', name: '🌳 Parks pie kanāla', group: 'f) Atpūtas vietas', url: 'level_9.html' },
+        { id: 'pludmale', name: '🏖️ Liepājas pludmale (FINĀLS)', group: 'f) Atpūtas vietas', url: 'level_10.html' },
+    ];
+
+    const quizQuestions = [
+        {
+            question: "Cik iedzīvotāju ir Liepājā (aptuveni)?",
+            options: ["50 000", "75 000", "100 000", "150 000"],
+            correct: 1
+        },
+        {
+            question: "Kā sauc Liepājas galveno pludmali?",
+            options: ["Zelta smiltis", "Baltā smiltis", "Sudraba smiltis", "Zilā smiltis"],
+            correct: 0
+        },
+        {
+            question: "Kurā gadā Liepāja ieguva pilsētas tiesības?",
+            options: ["1263", "1625", "1695", "1800"],
+            correct: 1
+        },
+        {
+            question: "Kāds ir Liepājas heraldiskais dzīvnieks?",
+            options: ["Lācis", "Vēzis", "Launs", "Jūras zvaigzne"],
+            correct: 2
+        },
+        {
+            question: "Cik garš ir Liepājas kanāls?",
+            options: ["1,2 km", "2,5 km", "3,8 km", "5 km"],
+            correct: 3
+        }
+    ];
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    }
+
+    function showAbout() {
+        document.getElementById('aboutModal').style.display = 'flex';
+    }
+
+    // НОВАЯ ФУНКЦИЯ: закрыть модал и вернуться на title screen
+    function closeAbout() {
+        document.getElementById('aboutModal').style.display = 'none';
+        showScreen('titleScreen');
+    }
+
+    function closeAboutAndStart() {
+        document.getElementById('aboutModal').style.display = 'none';
+        startGame();
+    }
+
+    function startGame() {
+        showScreen('locationsScreen');
+        renderLocations();
+        updateScore();
+    }
+
+    function renderLocations() {
+        const list = document.getElementById('locationsList');
+        list.innerHTML = '';
+        const groups = {};
+        
+        locations.forEach(loc => {
+            if (!groups[loc.group]) groups[loc.group] = [];
+            groups[loc.group].push(loc);
+        });
+
+        Object.keys(groups).forEach(group => {
+            if (group) {
+                const header = document.createElement('div');
+                header.className = 'group-header';
+                header.textContent = group;
+                list.appendChild(header);
+            }
+            groups[group].forEach(loc => {
+                const div = document.createElement('div');
+                div.className = `location ${visited.has(loc.id) ? 'visited' : ''}`;
+                div.innerHTML = `
+                    ${loc.name}
+                    <div class="external-link">→ ${loc.url}</div>
+                `;
+                div.onclick = () => visitLocation(loc.id, loc.url, loc.name);
+                list.appendChild(div);
+            });
+        });
+
+        const quizDiv = document.createElement('div');
+        quizDiv.className = `location ${quizCompleted ? 'visited game-complete' : ''}`;
+        quizDiv.innerHTML = `
+            🧠 KVIZ PAR LIEPĀJU (100 punkti!)
+            <div class="external-link">${quizCompleted ? '✅ PABEIGTS!' : '5 jautājumi'}</div>
+        `;
+        quizDiv.onclick = () => startQuiz();
+        list.appendChild(quizDiv);
+    }
+
+    function checkGameComplete() {
+        const allLocationsVisited = visited.size === locations.length;
+        const quizDone = quizCompleted;
+        
+        if (allLocationsVisited && quizDone) {
+            setTimeout(() => {
+                document.getElementById('finalScore').innerHTML = `
+                    <strong>🏆 PERFEKTS Risinājums! 🏆</strong><br>
+                    <span style="font-size: 1.5em; color: #FF4500;">
+                        ${score} no lokācijām + ${quizScore} no kviza = 
+                        <strong style="color: #FFD700; font-size: 2em;">${score + quizScore} / 200 PUNKTI!</strong>
+                    </span><br><br>
+                    <em>Tu apmeklēji visas 10 vietas Liepājā un pabeidzi kvizu!</em>
+                `;
+                showScreen('finalScreen');
+            }, 1000);
+        }
+    }
+
+    function visitLocation(id, url, name) {
+        if (visited.has(id)) return;
+        
+        if (!confirm(`Doties uz ${name}? Jāsakrāj monētas! \n\nAtveras: ${url}\n\nJā/ Nē`)) {
+            return;
+        }
+        
+        visited.add(id);
+        score += 10;
+        updateScore();
+        
+        window.open(url, '_blank');
+        renderLocations();
+        checkGameComplete();
+    }
+
+    function startQuiz() {
+        if (quizCompleted) return;
+        currentQuizQuestion = 0;
+        quizScore = 0;
+        showScreen('quizScreen');
+        renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+        const container = document.getElementById('quizContainer');
+        const question = quizQuestions[currentQuizQuestion];
+        
+        container.innerHTML = `
+            <div class="quiz-question">
+                <h3>${currentQuizQuestion + 1}. ${question.question}</h3>
+                <div class="quiz-options">
+                    ${question.options.map((opt, i) => 
+                        `<div class="quiz-option" onclick="selectQuizAnswer(${i})">${opt}</div>`
+                    ).join('')}
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('currentQuizScore').textContent = quizScore;
+        document.getElementById('quizProgress').style.width = 
+            `${((currentQuizQuestion + 1) / quizQuestions.length) * 100}%`;
+    }
+
+    function selectQuizAnswer(selectedIndex) {
+        const question = quizQuestions[currentQuizQuestion];
+        const options = document.querySelectorAll('.quiz-option');
+        
+        options.forEach((opt, i) => {
+            opt.style.pointerEvents = 'none';
+            if (i === question.correct) {
+                opt.classList.add('correct');
+            } else if (i === selectedIndex) {
+                opt.classList.add('incorrect');
+            }
+        });
+
+        if (selectedIndex === question.correct) {
+            quizScore += 20;
+        }
+
+        setTimeout(() => {
+            currentQuizQuestion++;
+            if (currentQuizQuestion < quizQuestions.length) {
+                renderQuizQuestion();
+            } else {
+                document.getElementById('quizCompleteBtn').style.display = 'inline-block';
+                document.getElementById('currentQuizScore').textContent = quizScore;
+            }
+        }, 1500);
+    }
+
+    function completeQuiz() {
+        quizCompleted = true;
+        updateScore();
+        alert(`Lieliski! Kviz pabeigts!\nKopā no kviza: ${quizScore}/100 punkti`);
+        showScreen('locationsScreen');
+        renderLocations();
+        checkGameComplete();
+    }
+
+    function backToLocations() {
+        showScreen('locationsScreen');
+        renderLocations();
+    }
+
+    function updateScore() {
+        const totalScore = score + (quizCompleted ? quizScore : 0);
+        document.getElementById('scoreDisplay').textContent = 
+            `Punkti: ${score}/100 no lokācijām + ${quizScore}/100 no kviza = ${totalScore}/200`;
+    }
+
+    function showTitle() {
+        showScreen('titleScreen');
+    }
+
+    function restartGame() {
+        score = 0;
+        visited.clear();
+        quizCompleted = false;
+        quizScore = 0;
+        updateScore();
+        showScreen('titleScreen');
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('aboutModal');
+            if (modal.style.display === 'flex') {
+                closeAbout();
+            }
+        }
+        if (e.key === 'Enter' && document.getElementById('aboutModal').style.display === 'flex') {
+            closeAboutAndStart();
+        }
+        if (e.key === 'Enter') startGame();
+        if (e.key.toLowerCase() === 'p') showAbout();
+    });
+</script>
+
+</body>
+</html>

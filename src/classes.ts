@@ -1,3 +1,16 @@
+import{
+    CreateObj,
+    EndGame,
+    
+}from './tools'
+
+import{
+    ravSvgCar,
+    ravSvgObst,
+    obstacleSize,
+    ravSvgPit
+}from './main'
+
 class CScreenObject{
     dom:HTMLDivElement;//Часть сегмента змейки визуально
     nX: number;//Текущая координата X
@@ -16,7 +29,7 @@ class CScreenObject{
 
 }
 
-class CCar extends CScreenObject{
+export class CCar extends CScreenObject{
     nDurability=100;
     durabilityCounterDom = CreateObj(120, 50, 60, "DurabilityCounter pos_abs", `HP: ${this.nDurability}`) as HTMLDivElement;
     Move(step: number){
@@ -38,6 +51,8 @@ class CCar extends CScreenObject{
                 this.durabilityCounterDom.style.color = "#00FF00";
             }else if (this.nDurability > 20){
                 this.durabilityCounterDom.style.color = "#FFFF00";
+            }else if (this.nDurability <= 20){
+                this.Crash();
             }else{
                 this.durabilityCounterDom.style.color = "#FF0000";
             } 
@@ -69,10 +84,10 @@ class CObstacle extends CScreenObject{
         this.dom.style.left = (this.nX - this.nSize / 2) + 'px';
     }
 }
-const aObstacles: CObstacle[]=[];//Создаём пустой массив монет
-const aObstaclesR: CObstacle[]=[];
+export const aObstacles: CObstacle[]=[];//Создаём пустой массив монет
+export const aObstaclesR: CObstacle[]=[];
 
-function createObstacle(x: number, bObstacleR?: boolean){
+export function createObstacle(x: number, bObstacleR?: boolean){
     const y = -obstacleSize;
     const size = obstacleSize;
     
@@ -85,7 +100,7 @@ function createObstacle(x: number, bObstacleR?: boolean){
     
 }
 
-class CCoins extends CScreenObject{
+export class CCoins extends CScreenObject{
     Fall(step: number){
         /*const item = this.dom.getBoundingClientRect();
         const oItem = document.getElementById('field')!.getBoundingClientRect();//Получаем размер и позицию границы поля относительно окна
@@ -112,7 +127,7 @@ class CCoins extends CScreenObject{
         }
     }
 
-    class CPit extends CScreenObject{
+    export class CPit extends CScreenObject{
     Fall(step: number){
         /*const item = this.dom.getBoundingClientRect();
         const oItem = document.getElementById('field')!.getBoundingClientRect();//Получаем размер и позицию границы поля относительно окна
@@ -139,6 +154,6 @@ class CCoins extends CScreenObject{
         }
     }
 
-class CGlobData{
+export class CGlobData{
     nRoadGoal=-1;
 }

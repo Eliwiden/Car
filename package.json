@@ -1,0 +1,28 @@
+{
+  "name": "fastify-ts-fullstack",
+  "version": "1.0.0",
+  "description": "Fullstack TypeScript project with Fastify and client-side TS modules",
+  "scripts": {
+    "build:server": "tsc -p tsconfig.server.json",
+    "build:client": "tsc -p tsconfig.client.json",
+    "build": "npm run build:server && npm run build:client",
+    "start": "node dist/server.js",
+    "dev:server": "nodemon --exec ts-node src/server.ts",
+    "dev:client": "tsc -p tsconfig.client.json --watch",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/static": "^6.10.2",
+    "fastify": "^4.24.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}

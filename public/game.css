@@ -1,0 +1,66 @@
+body{
+    margin: 0;
+    padding: 0;
+    width: calc(100%-10px);
+    height: calc(100%-10px);
+    background-color: gray;
+    border: solid 4px black;
+    overflow: hidden;
+}
+
+.CoinCounter {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.6);
+    color: gold;
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center;
+    border: 2px solid gold;
+    border-radius: 10px;
+}
+
+.CCar{
+   position: absolute;
+}
+
+.Coin{
+    position: absolute;
+    border: solid 2px goldenrod;
+    color: darkorange;
+    background-color: chocolate;
+    text-align: center;
+    border-radius: 50%;
+}
+
+/*.Obstacle{
+   position: absolute;
+}
+
+.Pit{
+    position: absolute;
+}*/
+
+.pos_abs{
+    position: absolute;
+}
+
+.CrashCar > svg > #corpe{
+    fill: red;
+}
+
+#level_info {
+    position: fixed;
+    top: 10px;
+    left: 200px;
+    z-index: 1000;
+    color: gold;
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center;
+    /*border: 2px solid gold;
+    border-radius: 10px;*/
+}
+

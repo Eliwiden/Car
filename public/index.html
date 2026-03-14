@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liepājas Spēle</title>
+	<link rel="stylesheet" href="./index.css"></head>
+<body>
+
+	<!-- Titulkadrs -->
+	<div id="titleScreen" class="screen active">
+		<h1>🌊 Liepājas Spēle 🌊</h1>
+		<p>Autors: Jelisejs Cvetkovs</p>
+		<p>Uzaicinājums: Iespied "Sākt spēli" vai <strong>Enter</strong>, lai sāktu!</p>
+		<p>Vai spied <strong>P</strong> par "Par spēli"</p>
+		<button id="startGame">Sākt spēli</button>
+		<!--<a href="game.html">Sākt spēli</a>-->
+		<button id="showAbout">Par spēli (Show About)</button>
+	</div>
+
+	<!-- Par spēli modāls -->
+	<div id="aboutModal" class="modal" style="display:none;">
+		<div class="modal-content">
+			<h2>Par spēli</h2>
+			<p><strong>Noteikumi:</strong> Noklikšķini uz visām 10 vietām Liepājā + pabeidz KVIZ!</p>
+			<p><strong>Mērķis:</strong> Savāc 200 punktus (10 vietas × 10 + kviz 100)!</p>
+			<p><strong>Fināls:</strong> Tikai pēc visu lokāciju + kviza pabeigšanas!</p>
+			<hr>
+			<p><strong>Komanda:</strong> Jelisejs Cvetkovs (kodētājs)</p>
+			<p><strong>Tehnoloģijas:</strong> HTML, CSS, JavaScript, TypeScript</p>
+			<p><strong>Avoti:</strong> GitHub, StackOverflow, Reddit</p>
+			<hr>
+			<div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+				<button id="closeAboutAndStart" style="flex: 1; min-width: 200px;">Sākt spēli (Close About and Start)</button>
+				<button class="back-btn" id="closeAbout" style="flex: 1; min-width: 200px;">Atpakaļ uz sākuma ekrānu (Close About)</button>
+			</div>
+			<p style="font-size: 14px; color: #666; margin-top: 15px;">
+				(Esc - aizvērt | Enter - sākt)
+			</p>
+		</div>
+	</div>
+
+	<!-- Vietu saraksts -->
+	<!--div id="locationsScreen" class="screen">
+		<h2>Izvēlies apmeklējuma vietu Liepājā</h2>
+		<div id="locationsList" class="locations"></div>
+		<div class="score" id="scoreDisplay">Punkti: 0</div>
+		<button onclick="showTitle()">Atpakaļ</button>
+	</div>
+
+	<div id="quizScreen" class="screen">
+		<h2>🧠 Kviz par Liepāju!</h2>
+		<div class="score" id="quizScoreDisplay">Punkti: <span id="currentQuizScore">0</span>/100</div>
+		<div id="quizContainer" class="quiz-container"></div>
+		<div class="quiz-progress">
+			<div class="quiz-progress-fill" id="quizProgress" style="width: 0%"></div>
+		</div>
+		<button id="quizCompleteBtn" onclick="completeQuiz()" style="display:none;">Pabeigt kvizu!</button>
+		<button onclick="backToLocations()">Atpakaļ uz lokācijām</button>
+	</div>
+
+	<div id="finalScreen" class="screen">
+		<h1>🎉 PILNĪGI IZSPĒLĒTS! 🏆</h1>
+		<p id="finalScore"></p>
+		<button onclick="restartGame()">Spēlēt vēlreiz</button>
+	</div-->
+
+	<script type="module" src="./js/index.js"></script>
+
+</body>
+</html>

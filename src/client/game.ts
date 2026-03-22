@@ -115,6 +115,19 @@ document.addEventListener('DOMContentLoaded', async function () {//Добавл�
             accuracy = oLevelInfo.accuracy
         }
     }
+    const domBtnLeft = document.getElementById('btn_left');
+    if(domBtnLeft){
+        domBtnLeft.onclick =()=>{
+            car.Move(-accuracy);
+        }
+    }
+    const domBtnRight = document.getElementById('btn_right');
+    if(domBtnRight){
+        domBtnRight.onclick =()=>{
+            car.Move(accuracy);
+        }
+    }
+
     function createCoinCounter() {
         coinCounterDom = CreateObj(50, 50, 60, "CoinCounter", `BTC<br>${coinCount}`);
         //return coinCounterDom;

@@ -64,3 +64,19 @@ body{
     border-radius: 10px;*/
 }
 
+.button_left_right{
+    position: absolute;
+    bottom: 20px;
+    border-radius: 25%;
+    font-size: 3rem;
+    width: 100px;
+    height: 100px;
+}
+
+#btn_left{
+    left: 20px;
+}
+
+#btn_right{
+    right: 20px;
+}

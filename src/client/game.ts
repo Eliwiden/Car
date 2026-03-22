@@ -77,21 +77,25 @@ let speed = 30;//easy: 30 medium: 50
 export let ROAD_WIDTH = 500;//easy: 500 medium: 300
 let COIN_SIZE = 50;
 let PIT_SIZE = 100;
+let accuracy = 5;
 
 let oPit: CPit | null = null;
 let nDelayPit = 10;
 
 window.onkeydown = (e: KeyboardEvent) => {
-    e.preventDefault()
+    e.preventDefault();
+    if(!bObstacleEnough){
+        return;
+    }
     switch (e.code) {
-        case "ArrowLeft": car.Move(-5);
+        case "ArrowLeft": car.Move(-accuracy);
             break;
-        case "ArrowRight": car.Move(5);
+        case "ArrowRight": car.Move(accuracy);
             break;
     }
 }
 
-const car = new CCar((nGlobX + ROAD_WIDTH) / 2, document.documentElement.clientHeight * 0.9, 100);
+const car = new CCar(nGlobX + ROAD_WIDTH/2, document.documentElement.clientHeight * 0.9, 100);
 export const oGlobData = new CGlobData();
 
 document.addEventListener('DOMContentLoaded', async function () {//Добавляем обработчик собятия "Loaded..."
@@ -108,6 +112,7 @@ document.addEventListener('DOMContentLoaded', async function () {//Добавл�
             ROAD_WIDTH = oLevelInfo.width;//easy: 500 medium: 300
             COIN_SIZE = oLevelInfo.coin;
             PIT_SIZE = oLevelInfo.pit;
+            accuracy = oLevelInfo.accuracy
         }
     }
     function createCoinCounter() {

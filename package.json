@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/static": "^6.10.2",
+    "axios": "^1.14.0",
     "fastify": "^4.24.3"
   },
   "devDependencies": {

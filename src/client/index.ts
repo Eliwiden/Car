@@ -1,9 +1,43 @@
+// Async/await version (already async - rewritten for clarity)
+export async function postData(sCommand: string, data: any): Promise<{
+  success: boolean;
+  received: any;
+  timestamp: string;
+}> {
+  try {
+    const response = await fetch('/api/'+sCommand, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Post failed:', error);
+    throw error;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('index.html loaded');
-	const domBtnAbout = document.getElementById("showAbout");
+    const domBtnAbout = document.getElementById("showAbout");
 	if(domBtnAbout){
-		domBtnAbout.onclick = () => {
+		domBtnAbout.onclick = async () => {
 			document.getElementById('aboutModal')!.style.display = 'flex';
+            try{
+                const aFileList = await postData('fileList', 'Headlights');
+                alert(aFileList);
+            }catch(error){
+                alert(error)
+            }
 		}
 	}
 	const domCloseAbout = document.getElementById("closeAbout");

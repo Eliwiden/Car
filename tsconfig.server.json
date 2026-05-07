@@ -9,6 +9,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/server.ts"],
+  "include": ["src/server.ts","src/s3-client.ts"],
   "exclude": ["node_modules", "dist", "src/client"]
 }

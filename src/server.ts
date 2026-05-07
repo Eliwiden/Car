@@ -1,6 +1,9 @@
 import fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
+import {Cs3API} from './s3-client';
+
+const s3api = new Cs3API;
 
 const server = fastify({ logger: true });
 
@@ -26,6 +29,17 @@ server.get('/api/hello', async (request, reply) => {
 // POST endpoint
 server.post('/api/data', async (request, reply) => {
   const body:any = request.body;
+  server.log.info('Received data:', body);
+  return {
+    success: true,
+    received: body,
+    timestamp: new Date().toISOString(),
+  };
+});
+
+// POST endpoint
+server.post('/api/fileList', async (request, reply) => {
+  const body:any = s3api.listFiles();
   server.log.info('Received data:', body);
   return {
     success: true,

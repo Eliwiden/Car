@@ -8,6 +8,21 @@ body{
     overflow: hidden;
 }
 
+html, body {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.button_left_right {
+    touch-action: manipulation;
+}
+
+
 .CoinCounter {
     position: fixed;
     top: 20px;
@@ -64,3 +79,19 @@ body{
     border-radius: 10px;*/
 }
 
+.button_left_right{
+    position: absolute;
+    bottom: 20px;
+    border-radius: 25%;
+    font-size: 3rem;
+    width: 100px;
+    height: 100px;
+}
+
+#btn_left{
+    left: 20px;
+}
+
+#btn_right{
+    right: 20px;
+}

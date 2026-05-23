@@ -1,12 +1,36 @@
 <!DOCTYPE html>
 <html lang="lv">
-<head>
-    <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Liepājas Spēle</title>
-	<link rel="stylesheet" href="./index.css"></head>
-<body>
 
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Liepājas Spēle</title>
+	<link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+	<!-- Login screen -->
+	<div id="loginScreen" class="screen active">
+		<div class="passport-card">
+			<div class="passport-header">
+				<div class="passport-emblem">🛂</div>
+				<h1>Passport Login</h1>
+				<p>Enter your Gmail to continue</p>
+			</div>
+
+			<form id="loginForm">
+				<label for="gmail">Gmail</label>
+				<input type="email" id="gmail" name="gmail" placeholder="yourname@gmail.com" required>
+
+				<label for="password">Password</label>
+				<input type="password" id="password" name="password" placeholder="Enter password" required>
+
+				<button type="submit">Login</button>
+			</form>
+
+			<p class="login-note">Green access verified.</p>
+		</div>
+	</div>
 	<!-- Titulkadrs -->
 	<div id="titleScreen" class="screen active">
 		<h1>🌊 Liepājas Spēle 🌊</h1>
@@ -31,8 +55,10 @@
 			<p><strong>Avoti:</strong> GitHub, StackOverflow, Reddit</p>
 			<hr>
 			<div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-				<button id="closeAboutAndStart" style="flex: 1; min-width: 200px;">Sākt spēli (Close About and Start)</button>
-				<button class="back-btn" id="closeAbout" style="flex: 1; min-width: 200px;">Atpakaļ uz sākuma ekrānu (Close About)</button>
+				<button id="closeAboutAndStart" style="flex: 1; min-width: 200px;">Sākt spēli (Close About and
+					Start)</button>
+				<button class="back-btn" id="closeAbout" style="flex: 1; min-width: 200px;">Atpakaļ uz sākuma ekrānu
+					(Close About)</button>
 			</div>
 			<p style="font-size: 14px; color: #666; margin-top: 15px;">
 				(Esc - aizvērt | Enter - sākt)
@@ -65,7 +91,10 @@
 		<button onclick="restartGame()">Spēlēt vēlreiz</button>
 	</div-->
 
-	<script type="module" src="./js/index.js"></script>
+	<script type="module" src="./js/index.js">
+		
+	</script>
 
 </body>
+
 </html>

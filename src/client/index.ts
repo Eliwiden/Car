@@ -1,51 +1,51 @@
 // Async/await version (already async - rewritten for clarity)
 export async function postData(sCommand: string, data: any): Promise<{
-  success: boolean;
-  received: any;
-  timestamp: string;
+    success: boolean;
+    received: any;
+    timestamp: string;
 }> {
-  try {
-    const response = await fetch('/api/'+sCommand, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+        const response = await fetch('/api/' + sCommand, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Post failed:', error);
+        throw error;
     }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error('Post failed:', error);
-    throw error;
-  }
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('index.html loaded');
     const domBtnAbout = document.getElementById("showAbout");
-	if(domBtnAbout){
-		domBtnAbout.onclick = async () => {
-			document.getElementById('aboutModal')!.style.display = 'flex';
-            try{
+    if (domBtnAbout) {
+        domBtnAbout.onclick = async () => {
+            document.getElementById('aboutModal')!.style.display = 'flex';
+            try {
                 const aFileList = await postData('fileList', 'Headlights');
                 alert(aFileList);
-            }catch(error){
+            } catch (error) {
                 alert(error)
             }
-		}
-	}
-	const domCloseAbout = document.getElementById("closeAbout");
-	if(domCloseAbout){
-		domCloseAbout.onclick = () => {
-			document.getElementById('aboutModal')!.style.display = 'none';
-		}
-	}
+        }
+    }
+    const domCloseAbout = document.getElementById("closeAbout");
+    if (domCloseAbout) {
+        domCloseAbout.onclick = () => {
+            document.getElementById('aboutModal')!.style.display = 'none';
+        }
+    }
     const domCloseAboutAndStart = document.getElementById("closeAboutAndStart");
     if (domCloseAboutAndStart) {
         domCloseAboutAndStart.onclick = () => {
@@ -62,6 +62,24 @@ document.addEventListener('DOMContentLoaded', async function () {
             window.open(urlWithParams, '_self');
         };
     }
+    
+    const domLoginForm = document.getElementById("loginForm");
+    if(domLoginForm){
+        domLoginForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const gmail = (document.getElementById("gmail") as HTMLInputElement).value.trim();
+        const password = (document.getElementById("password") as HTMLInputElement).value;
+
+        if (!password) {
+            alert("Enter your password.");
+            return;
+        }
+
+        handleLogin(gmail, password);
+    });
+
+    }
 });
 /*
 // НОВАЯ ФУНКЦИЯ: закрыть модал и вернуться на title screen
@@ -76,3 +94,8 @@ function closeAboutAndStart() {
 }
 
 */
+
+function handleLogin(gmail: string, password: string) {
+    console.log("Login info:", gmail, password);
+    //startGame(); // replace with your actual function if different
+}

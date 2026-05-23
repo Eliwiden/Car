@@ -1,11 +1,12 @@
 import fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
-import {Cs3API} from './s3-client';
+import dotenv from 'dotenv';
+import b2Service from './b2Service';
 
-const s3api = new Cs3API;
+dotenv.config();
 
-const server = fastify({ logger: true });
+const server = fastify({ logger: false });
 
 // Статика для изображений
 server.register(fastifyStatic, {
@@ -26,6 +27,15 @@ server.get('/api/hello', async (request, reply) => {
   return { message: 'Hello from Fastify + TypeScript!' };
 });
 
+server.get('/api/fileList', async () => {
+  console.log('/api/fileList');
+    const result = await b2Service.listFiles();
+    return {
+      status: 'fileList',
+      result
+    };
+});
+
 // POST endpoint
 server.post('/api/data', async (request, reply) => {
   const body:any = request.body;
@@ -38,15 +48,15 @@ server.post('/api/data', async (request, reply) => {
 });
 
 // POST endpoint
-server.post('/api/fileList', async (request, reply) => {
-  const body:any = s3api.listFiles();
+/*server.post('/api/fileList', async (request, reply) => {
+  const body:any = .listFiles();
   server.log.info('Received data:', body);
   return {
     success: true,
     received: body,
     timestamp: new Date().toISOString(),
   };
-});
+});*/
 
 const start = async () => {
   try {

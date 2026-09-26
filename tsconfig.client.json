@@ -3,13 +3,12 @@
     "target": "ES2020",
     "module": "ESNext",
     "outDir": "./public/js",
-    "rootDir": "./src/client",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node"
   },
-  "include": ["src/client/**/*"],
+  "include": ["src/client/**/*","src/types.ts"],
   "exclude": ["node_modules"]
 }

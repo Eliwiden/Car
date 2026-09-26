@@ -1,36 +1,86 @@
 <!DOCTYPE html>
 <html lang="lv">
 
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>Liepājas Spēle</title>
 	<link rel="stylesheet" href="./index.css">
+	<link rel="icon" href="./favicon.svg" type="image/x-icon">
 </head>
+
 
 <body>
 	<!-- Login screen -->
-	<div id="loginScreen" class="screen active">
+	<div id="loginButton">
+		Register
+	</div>
+	<div id="signupButton">
+		Sign up
+	</div>
+
+
+	<div id="loginScreen" class="modal" style="display:none;">
 		<div class="passport-card">
 			<div class="passport-header">
 				<div class="passport-emblem">🛂</div>
-				<h1>Passport Login</h1>
+				<h1>Login</h1>
 				<p>Enter your Gmail to continue</p>
 			</div>
+
 
 			<form id="loginForm">
 				<label for="gmail">Gmail</label>
 				<input type="email" id="gmail" name="gmail" placeholder="yourname@gmail.com" required>
 
+
 				<label for="password">Password</label>
 				<input type="password" id="password" name="password" placeholder="Enter password" required>
+
 
 				<button type="submit">Login</button>
 			</form>
 
+
 			<p class="login-note">Green access verified.</p>
 		</div>
 	</div>
+
+	<div id="signupScreen" class="modal" style="display:none;">
+		<div class="passport-card">
+			<div class="passport-header">
+				<div class="passport-emblem">🛂</div>
+				<h1>Sign Up</h1>
+				<p>Enter your details to create an account</p>
+			</div>
+
+
+			<form id="signupForm">
+				<label for="name">Name</label>
+				<input type="text" id="name" name="name" placeholder="Enter your name" required>
+
+
+				<label for="gmail">Mail</label>
+				<input type="email" id="gmail" name="gmail" placeholder="yourname@gmail.com" required>
+
+
+				<label for="password">Password</label>
+				<input type="password" id="password" name="password" placeholder="Enter password" required>
+
+				<label for="confirmPassword">Confirm Password</label>
+				<input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+
+
+				<button type="submit">Sign up</button>
+			</form>
+
+
+			<p class="login-note">Green access verified.</p>
+		</div>
+	</div>
+
+
 	<!-- Titulkadrs -->
 	<div id="titleScreen" class="screen active">
 		<h1>🌊 Liepājas Spēle 🌊</h1>
@@ -42,6 +92,7 @@
 		<button id="showAbout">Par spēli (Show About)</button>
 	</div>
 
+
 	<!-- Par spēli modāls -->
 	<div id="aboutModal" class="modal" style="display:none;">
 		<div class="modal-content">
@@ -49,52 +100,64 @@
 			<p><strong>Noteikumi:</strong> Noklikšķini uz visām 10 vietām Liepājā + pabeidz KVIZ!</p>
 			<p><strong>Mērķis:</strong> Savāc 200 punktus (10 vietas × 10 + kviz 100)!</p>
 			<p><strong>Fināls:</strong> Tikai pēc visu lokāciju + kviza pabeigšanas!</p>
+
 			<hr>
 			<p><strong>Komanda:</strong> Jelisejs Cvetkovs (kodētājs)</p>
 			<p><strong>Tehnoloģijas:</strong> HTML, CSS, JavaScript, TypeScript</p>
 			<p><strong>Avoti:</strong> GitHub, StackOverflow, Reddit</p>
+
 			<hr>
 			<div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-				<button id="closeAboutAndStart" style="flex: 1; min-width: 200px;">Sākt spēli (Close About and
+				<button id="closeAboutAndStart" style="flex: 1; min-width: 200px;">Sākt spēli (Close
+					About and
 					Start)</button>
-				<button class="back-btn" id="closeAbout" style="flex: 1; min-width: 200px;">Atpakaļ uz sākuma ekrānu
+				<button class="back-btn" id="closeAbout" style="flex: 1; min-width: 200px;">Atpakaļ uz
+					sākuma ekrānu
 					(Close About)</button>
 			</div>
 			<p style="font-size: 14px; color: #666; margin-top: 15px;">
 				(Esc - aizvērt | Enter - sākt)
 			</p>
+
 		</div>
 	</div>
+
 
 	<!-- Vietu saraksts -->
 	<!--div id="locationsScreen" class="screen">
-		<h2>Izvēlies apmeklējuma vietu Liepājā</h2>
-		<div id="locationsList" class="locations"></div>
-		<div class="score" id="scoreDisplay">Punkti: 0</div>
-		<button onclick="showTitle()">Atpakaļ</button>
-	</div>
+        <h2>Izvēlies apmeklējuma vietu Liepājā</h2>
+        <div id="locationsList" class="locations"></div>
+        <div class="score" id="scoreDisplay">Punkti: 0</div>
+        <button onclick="showTitle()">Atpakaļ</button>
+    </div>
 
-	<div id="quizScreen" class="screen">
-		<h2>🧠 Kviz par Liepāju!</h2>
-		<div class="score" id="quizScoreDisplay">Punkti: <span id="currentQuizScore">0</span>/100</div>
-		<div id="quizContainer" class="quiz-container"></div>
-		<div class="quiz-progress">
-			<div class="quiz-progress-fill" id="quizProgress" style="width: 0%"></div>
-		</div>
-		<button id="quizCompleteBtn" onclick="completeQuiz()" style="display:none;">Pabeigt kvizu!</button>
-		<button onclick="backToLocations()">Atpakaļ uz lokācijām</button>
-	</div>
 
-	<div id="finalScreen" class="screen">
-		<h1>🎉 PILNĪGI IZSPĒLĒTS! 🏆</h1>
-		<p id="finalScore"></p>
-		<button onclick="restartGame()">Spēlēt vēlreiz</button>
-	</div-->
+    <div id="quizScreen" class="screen">
+        <h2>🧠 Kviz par Liepāju!</h2>
+        <div class="score" id="quizScoreDisplay">Punkti: <span id="currentQuizScore">0</span>/100</div>
+        <div id="quizContainer" class="quiz-container"></div>
+        <div class="quiz-progress">
+            <div class="quiz-progress-fill" id="quizProgress" style="width: 0%"></div>
+        </div>
+        <button id="quizCompleteBtn" onclick="completeQuiz()" style="display:none;">Pabeigt kvizu!</button>
+        <button onclick="backToLocations()">Atpakaļ uz lokācijām</button>
+    </div>
+
+
+    <div id="finalScreen" class="screen">
+        <h1>🎉 PILNĪGI IZSPĒLĒTS! 🏆</h1>
+        <p id="finalScore"></p>
+        <button onclick="restartGame()">Spēlēt vēlreiz</button>
+    </div-->
+
 
 	<script type="module" src="./js/index.js">
-		
+
+
 	</script>
 
+
 </body>
+
 
 </html>

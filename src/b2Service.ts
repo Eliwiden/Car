@@ -4,17 +4,26 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  type _Object,
+  type ListObjectsV2CommandOutput,
+  type CompleteMultipartUploadCommandOutput,
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import s3Client from './config_b2.js';
-import { 
-  FileListResponse, 
-  UploadResponse, 
-  FileData, 
-  FileMetadata, 
-  FileInfo
+import {
+  UploadResponse,
+  FileData,
+  FileMetadata,
+  FileInfo,
 } from './types.js';
+
+type ListItemsResponse = {
+  files: FileInfo[];
+  folders: string[];
+  nextContinuationToken?: string;
+  isTruncated?: boolean;
+};
 
 class B2Service {
   private bucketName: string;
@@ -23,48 +32,47 @@ class B2Service {
     this.bucketName = process.env.B2_BUCKET_NAME!;
   }
 
-  /**
-   * Получение списка файлов в бакете
-   */
-  async listFiles(prefix: string = '', maxKeys: number = 100): Promise<FileListResponse> {
+  async listItems(path: string = '', maxKeys: number = 100)/*: Promise<ListItemsResponse>*/ {
     try {
+      const normalizedPath =
+        path && !path.endsWith('/') ? `${path}/` : path;
       const command = new ListObjectsV2Command({
         Bucket: this.bucketName,
-        Prefix: prefix,
-        //MaxKeys: maxKeys,
-		Delimiter:"\/"
+        Prefix: normalizedPath,
+        Delimiter: '/',
+        MaxKeys: maxKeys,
       });
 
-		const response = await s3Client.send(command);
-		console.log(response);
-		const folderList = response.CommonPrefixes || [];
-		const files:FileInfo[] = [];
-		for(const folder of folderList){
-			const command2 = new ListObjectsV2Command({
-				Bucket: this.bucketName,
-				Prefix: folder.Prefix,
-				Delimiter:"\/"
-			});
-			const response2 = await s3Client.send(command2);
-			console.log(response2);
+      const response: ListObjectsV2CommandOutput = await s3Client.send(command);
+      //console.log('ListObjectsV2Command response:', response);
+      const folders = (response.CommonPrefixes || [])
+        .map(p => p.Prefix)
+        .filter(it => !!it);
 
-			for(const file of (response2.Contents || [])){
-				files.push(file);
-			}
-		}
-		return {
-			files,
-			nextContinuationToken: response.NextContinuationToken,
-			isTruncated: response.IsTruncated,
-		};
+      const files = (response.Contents || [])
+        .filter((item): item is _Object => Boolean(item.Key) && item.Key !== normalizedPath)
+        .map((item) => ({
+          key: item.Key!,
+          size: item.Size,
+          lastModified: item.LastModified,
+          etag: item.ETag,
+          storageClass: item.StorageClass,
+        }));
+      if (path && folders.length === 0 && files.length === 0) {
+        throw new Error(`Folder not found: ${path}`);
+      }
+
+      return {
+        files,
+        folders,
+        nextContinuationToken: response.NextContinuationToken,
+        isTruncated: response.IsTruncated,
+      };
     } catch (error: any) {
-      throw new Error(`Failed to list files: ${error.message}`);
+      throw new Error(`Failed to list items: ${error.message}`);
     }
   }
 
-  /**
-   * Загрузка файла в бакет
-   */
   async uploadFile(fileBuffer: Buffer, fileName: string, mimeType: string): Promise<UploadResponse> {
     try {
       const uploadParams = {
@@ -77,14 +85,14 @@ class B2Service {
       const parallelUpload = new Upload({
         client: s3Client,
         params: uploadParams,
-        queueSize: 4, // Параллельная загрузка частей
-        partSize: 5 * 1024 * 1024, // 5 MB
+        queueSize: 4,
+        partSize: 5 * 1024 * 1024,
       });
 
-      const result = await parallelUpload.done();
-      
+      const result = await parallelUpload.done() as CompleteMultipartUploadCommandOutput;
+
       return {
-        key: result.Key,
+        key: fileName,
         location: result.Location,
         etag: result.ETag,
       };
@@ -93,9 +101,6 @@ class B2Service {
     }
   }
 
-  /**
-   * Получение файла из бакета
-   */
   async getFile(fileName: string): Promise<FileData> {
     try {
       const command = new GetObjectCommand({
@@ -104,17 +109,16 @@ class B2Service {
       });
 
       const response = await s3Client.send(command);
-      
-      // Конвертация стрима в буфер
+
       const chunks: Buffer[] = [];
       const stream = response.Body as any;
-      
+
       for await (const chunk of stream) {
         chunks.push(chunk);
       }
-      
+
       const buffer = Buffer.concat(chunks);
-      
+
       return {
         data: buffer,
         contentType: response.ContentType,
@@ -125,9 +129,6 @@ class B2Service {
     }
   }
 
-  /**
-   * Генерация подписанной ссылки для скачивания
-   */
   async getSignedDownloadUrl(fileName: string, expiresIn: number = 3600): Promise<string> {
     try {
       const command = new GetObjectCommand({
@@ -141,9 +142,6 @@ class B2Service {
     }
   }
 
-  /**
-   * Удаление файла из бакета
-   */
   async deleteFile(fileName: string): Promise<{ deleted: boolean; key: string }> {
     try {
       const command = new DeleteObjectCommand({
@@ -152,16 +150,13 @@ class B2Service {
       });
 
       await s3Client.send(command);
-      
+
       return { deleted: true, key: fileName };
     } catch (error: any) {
       throw new Error(`Failed to delete file: ${error.message}`);
     }
   }
 
-  /**
-   * Получение метаданных файла
-   */
   async getFileMetadata(fileName: string): Promise<FileMetadata> {
     try {
       const command = new HeadObjectCommand({
@@ -170,7 +165,7 @@ class B2Service {
       });
 
       const response = await s3Client.send(command);
-      
+
       return {
         key: fileName,
         size: response.ContentLength,
@@ -184,9 +179,6 @@ class B2Service {
     }
   }
 
-  /**
-   * Чтение текстового файла
-   */
   async readTextFile(fileName: string): Promise<string> {
     try {
       const { data } = await this.getFile(fileName);
@@ -196,13 +188,10 @@ class B2Service {
     }
   }
 
-  /**
-   * Запись в текстовый файл
-   */
   async writeTextFile(fileName: string, content: string): Promise<UploadResponse> {
     try {
       const buffer = Buffer.from(content, 'utf-8');
-      
+
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: fileName,
@@ -211,7 +200,7 @@ class B2Service {
       });
 
       const result = await s3Client.send(command);
-      
+
       return {
         key: fileName,
         etag: result.ETag,

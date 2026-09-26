@@ -242,3 +242,13 @@ body {
     font-size: 14px;
     opacity: 0.9;
 }
+
+#loginButton{
+	color: whitesmoke;
+	position: absolute;
+	font-weight: 800;
+	font-size: xx-large;
+	top: 50px;
+	right: 50px;
+}
+

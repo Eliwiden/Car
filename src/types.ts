@@ -1,11 +1,21 @@
 //import { MultipartFile } from '@fastify/multipart';
 
+import type { ObjectStorageClass } from '@aws-sdk/client-s3';
+
 export interface FileInfo {
-  Key?: string;
+  Key: string;
+  size?: number;
+  lastModified?: Date;
+  etag?: string;
+  storageClass?: ObjectStorageClass;
+}
+
+export interface FileInfo {
+  key: string;
+  size?: number;
   LastModified?: Date;
-  ETag?: string;
-  Size?: number;
-  StorageClass?: string;
+  etag?: string;
+  storageClass?: ObjectStorageClass;
 }
 
 export interface FileListResponse {
@@ -64,4 +74,9 @@ export interface FileParams {
 export interface WriteFileBody {
   fileName: string;
   content: string;
+}
+
+export interface LoginData {
+  password: string;
+  userId: string;
 }

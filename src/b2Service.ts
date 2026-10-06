@@ -4,11 +4,10 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  S3ServiceException,
   type _Object,
   type ListObjectsV2CommandOutput,
-  type CompleteMultipartUploadCommandOutput,
 } from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import s3Client from './config_b2.js';
 import {
@@ -32,10 +31,41 @@ class B2Service {
     this.bucketName = process.env.B2_BUCKET_NAME!;
   }
 
-  async listItems(path: string = '', maxKeys: number = 100)/*: Promise<ListItemsResponse>*/ {
+  private logError(operation: string, error: unknown): void {
+    if (error instanceof S3ServiceException) {
+      console.error(`B2 ${operation} failed:`, {
+        name: error.name,
+        message: error.message,
+        httpStatusCode: error.$metadata?.httpStatusCode,
+        requestId: error.$metadata?.requestId,
+        extendedRequestId: error.$metadata?.extendedRequestId,
+        fault: error.$fault,
+        stack: error.stack,
+      });
+      return;
+    }
+
+    console.error(`B2 ${operation} failed with non-S3 error:`, error);
+  }
+
+  private getB2ErrorMessage(operation: string, error: unknown): string {
+    if (error instanceof S3ServiceException) {
+      const status = error.$metadata?.httpStatusCode;
+      return `B2 ${operation} failed: ${error.name} (${status ?? 'unknown status'}): ${error.message}`;
+    }
+
+    if (error instanceof Error) {
+      return `B2 ${operation} failed: ${error.message}`;
+    }
+
+    return `B2 ${operation} failed: unknown error`;
+  }
+
+  async listItems(path: string = '', maxKeys: number = 100): Promise<ListItemsResponse> {
     try {
       const normalizedPath =
         path && !path.endsWith('/') ? `${path}/` : path;
+
       const command = new ListObjectsV2Command({
         Bucket: this.bucketName,
         Prefix: normalizedPath,
@@ -44,20 +74,25 @@ class B2Service {
       });
 
       const response: ListObjectsV2CommandOutput = await s3Client.send(command);
-      //console.log('ListObjectsV2Command response:', response);
+
       const folders = (response.CommonPrefixes || [])
-        .map(p => p.Prefix)
-        .filter(it => !!it);
+        .map(prefix => prefix.Prefix)
+        .filter((prefix): prefix is string => Boolean(prefix));
 
       const files = (response.Contents || [])
-        .filter((item): item is _Object => Boolean(item.Key) && item.Key !== normalizedPath)
-        .map((item) => ({
+        .filter((item): item is _Object =>
+          Boolean(item.Key) && item.Key !== normalizedPath
+        )
+        .map(item => ({
+          Key: item.Key!,
           key: item.Key!,
           size: item.Size,
           lastModified: item.LastModified,
+          LastModified: item.LastModified,
           etag: item.ETag,
           storageClass: item.StorageClass,
         }));
+
       if (path && folders.length === 0 && files.length === 0) {
         throw new Error(`Folder not found: ${path}`);
       }
@@ -68,36 +103,34 @@ class B2Service {
         nextContinuationToken: response.NextContinuationToken,
         isTruncated: response.IsTruncated,
       };
-    } catch (error: any) {
-      throw new Error(`Failed to list items: ${error.message}`);
+    } catch (error: unknown) {
+      this.logError('listItems', error);
+      throw new Error(this.getB2ErrorMessage('listItems', error));
     }
   }
 
-  async uploadFile(fileBuffer: Buffer, fileName: string, mimeType: string): Promise<UploadResponse> {
+  async uploadFile(
+    fileBuffer: Buffer,
+    fileName: string,
+    mimeType: string
+  ): Promise<UploadResponse> {
     try {
-      const uploadParams = {
+      const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: fileName,
         Body: fileBuffer,
         ContentType: mimeType,
-      };
-
-      const parallelUpload = new Upload({
-        client: s3Client,
-        params: uploadParams,
-        queueSize: 4,
-        partSize: 5 * 1024 * 1024,
       });
 
-      const result = await parallelUpload.done() as CompleteMultipartUploadCommandOutput;
+      const result = await s3Client.send(command);
 
       return {
         key: fileName,
-        location: result.Location,
         etag: result.ETag,
       };
-    } catch (error: any) {
-      throw new Error(`Failed to upload file: ${error.message}`);
+    } catch (error: unknown) {
+      this.logError('uploadFile', error);
+      throw new Error(this.getB2ErrorMessage('uploadFile', error));
     }
   }
 
@@ -110,26 +143,27 @@ class B2Service {
 
       const response = await s3Client.send(command);
 
-      const chunks: Buffer[] = [];
-      const stream = response.Body as any;
-
-      for await (const chunk of stream) {
-        chunks.push(chunk);
+      if (!response.Body) {
+        throw new Error(`Empty response body for file: ${fileName}`);
       }
 
-      const buffer = Buffer.concat(chunks);
+      const data = await response.Body.transformToByteArray();
 
       return {
-        data: buffer,
+        data: Buffer.from(data),
         contentType: response.ContentType,
         contentLength: response.ContentLength,
       };
-    } catch (error: any) {
-      throw new Error(`Failed to get file: ${error.message}`);
+    } catch (error: unknown) {
+      this.logError('getFile', error);
+      throw new Error(this.getB2ErrorMessage('getFile', error));
     }
   }
 
-  async getSignedDownloadUrl(fileName: string, expiresIn: number = 3600): Promise<string> {
+  async getSignedDownloadUrl(
+    fileName: string,
+    expiresIn: number = 3600
+  ): Promise<string> {
     try {
       const command = new GetObjectCommand({
         Bucket: this.bucketName,
@@ -137,8 +171,9 @@ class B2Service {
       });
 
       return await getSignedUrl(s3Client, command, { expiresIn });
-    } catch (error: any) {
-      throw new Error(`Failed to generate signed URL: ${error.message}`);
+    } catch (error: unknown) {
+      this.logError('getSignedDownloadUrl', error);
+      throw new Error(this.getB2ErrorMessage('getSignedDownloadUrl', error));
     }
   }
 
@@ -151,9 +186,13 @@ class B2Service {
 
       await s3Client.send(command);
 
-      return { deleted: true, key: fileName };
-    } catch (error: any) {
-      throw new Error(`Failed to delete file: ${error.message}`);
+      return {
+        deleted: true,
+        key: fileName,
+      };
+    } catch (error: unknown) {
+      this.logError('deleteFile', error);
+      throw new Error(this.getB2ErrorMessage('deleteFile', error));
     }
   }
 
@@ -174,8 +213,9 @@ class B2Service {
         etag: response.ETag,
         metadata: response.Metadata,
       };
-    } catch (error: any) {
-      throw new Error(`Failed to get file metadata: ${error.message}`);
+    } catch (error: unknown) {
+      this.logError('getFileMetadata', error);
+      throw new Error(this.getB2ErrorMessage('getFileMetadata', error));
     }
   }
 
@@ -183,8 +223,9 @@ class B2Service {
     try {
       const { data } = await this.getFile(fileName);
       return data.toString('utf-8');
-    } catch (error: any) {
-      throw new Error(`Failed to read text file: ${error.message}`);
+    } catch (error: unknown) {
+      this.logError('readTextFile', error);
+      throw new Error(this.getB2ErrorMessage('readTextFile', error));
     }
   }
 
@@ -205,8 +246,9 @@ class B2Service {
         key: fileName,
         etag: result.ETag,
       };
-    } catch (error: any) {
-      throw new Error(`Failed to write text file: ${error.message}`);
+    } catch (error: unknown) {
+      this.logError('writeTextFile', error);
+      throw new Error(this.getB2ErrorMessage('writeTextFile', error));
     }
   }
 }

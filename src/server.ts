@@ -4,44 +4,44 @@ import path from 'path';
 import dotenv from 'dotenv';
 import b2Service from './b2Service';
 import { hashPasswordServer, verifyPasswordServer } from './AuthService';
-import {LoginData } from './types';
+import { LoginData } from './types';
 
 dotenv.config();
 
-const server = fastify({ logger: false });
+const server = fastify({
+  logger: false,
+});
 
-// Статика для изображений
 server.register(fastifyStatic, {
   root: path.join(__dirname, '..', 'images'),
   prefix: '/images/',
   decorateReply: false,
 });
 
-// Статика для public (HTML, CSS, JS)
 server.register(fastifyStatic, {
   root: path.join(__dirname, '..', 'public'),
   prefix: '/',
   decorateReply: false,
 });
 
-// GET endpoint
-server.get('/api/hello', async (request, reply) => {
-  return { message: 'Hello from Fastify + TypeScript!' };
+server.get('/api/hello', async () => {
+  return {
+    message: 'Hello from Fastify + TypeScript!',
+  };
 });
 
 server.get('/api/fileList', async () => {
-  console.log('/api/fileList');
   const result = await b2Service.listItems();
+
   return {
     status: 'fileList',
-    result
+    result,
   };
 });
 
-// POST endpoint
-server.post('/api/data', async (request, reply) => {
-  const body: any = request.body;
-  server.log.info('Received data:', body);
+server.post('/api/data', async request => {
+  const body = request.body as Record<string, unknown>;
+
   return {
     success: true,
     received: body,
@@ -49,114 +49,187 @@ server.post('/api/data', async (request, reply) => {
   };
 });
 
-server.post('/api/upload', async (request, reply) => {
-  const body: any = request.body;
+const uploadSchema = {
+  body: {
+    type: 'object',
+    required: ['file', 'fileName', 'mimeType'],
+    properties: {
+      file: { type: 'string' },
+      fileName: { type: 'string', minLength: 1 },
+      mimeType: { type: 'string', minLength: 1 },
+    },
+    additionalProperties: false,
+  },
+} as const;
 
-  // Декодируем base64 строку в настоящий Buffer
-  const fileBuffer = Buffer.from(body.file, 'base64');
-  const fileName = body.fileName;
-  const mimeType = body.mimeType;
-  console.log(fileName);
-  const decodedText = fileBuffer.toString('utf-8');
-  console.log(decodedText);
-  const ret = await b2Service.uploadFile(fileBuffer, fileName, mimeType);
+server.post('/api/upload', { schema: uploadSchema }, async (request, reply) => {
+  type UploadBody = { file: string; fileName: string; mimeType: string };
+  const { file, fileName, mimeType } = request.body as unknown as UploadBody;
+
+  const fileBuffer = Buffer.from(file, 'base64');
+
+  if (fileBuffer.length === 0) {
+    return reply.status(400).send({
+      success: false,
+      message: 'Uploaded file is empty',
+    });
+  }
+
+  const uploadResult = await b2Service.uploadFile(
+    fileBuffer,
+    fileName,
+    mimeType
+  );
 
   return {
     success: true,
-    fileId: `file_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-    fileName: fileName,
-    mimeType: mimeType,
-    size: fileBuffer?.length || 0,
-    ret,
+    fileName,
+    mimeType,
+    size: fileBuffer.length,
+    uploadResult,
     timestamp: new Date().toISOString(),
-
   };
 });
 
-server.post('/api/login', async (request, reply) => {
-  const body: LoginData = request.body as any;
-  // Декодируем base64 строку в настоящий Buffer
-  const Password = Buffer.from(body.password, 'base64').toString('utf-8');
-  const userId = body.userId;
-  //Берем с нашего хранилища данных в которых хранятся пароли
-  const result = await b2Service.listItems();
+const loginSchema = {
+  body: {
+    type: 'object',
+    required: ['password', 'userId'],
+    properties: {
+      password: { type: 'string' },
+      userId: { type: 'string', minLength: 1 },
+    },
+    additionalProperties: false,
+  },
+} as const;
 
-  for (const it of result.files) {
-    if (it.key && userId.toLowerCase() === it.key.toLowerCase()) {
-      try {
-        const content = await b2Service.readTextFile(userId);
-        await verifyPasswordServer(Password, content);
-        return {
-          success: true,
-        }
-      } catch (error) {
-        console.log('Password verification failed:', error);
-        return {
-          success: false,
-        }
-      }
-    }
-    console.log(userId);
-  }
-  return {
-    success: false,
+server.post('/api/login', { schema: loginSchema }, async (request, reply) => {
+  const { password, userId } = request.body as LoginData;
+
+  const normalizedUserId = userId.trim().toLowerCase();
+
+  if (!normalizedUserId) {
+    return reply.status(400).send({
+      success: false,
+      message: 'User ID is required',
+    });
   }
 
-});
+  try {
+    const passwordHash = await b2Service.readTextFile(normalizedUserId);
+    const isValid = await verifyPasswordServer(
+      Buffer.from(password, 'base64').toString('utf-8'),
+      passwordHash
+    );
 
+    if (!isValid) {
+      server.log.warn(`Invalid password for user: ${normalizedUserId}`);
 
-server.post('/api/signup', async (request, reply) => {
-  const result = await b2Service.listItems();
-  const body: any = request.body;
-
-  // Декодируем base64 строку в настоящий Buffer
-  const Password = Buffer.from(body.file, 'base64').toString('utf-8');
-  const userId = body.fileName;
-
-  for (const it of result.files) {
-    if (it.key && userId.toLowerCase() === it.key.toLowerCase()) {
       return {
         success: false,
-        message: 'User already exists'
       };
     }
-    console.log(userId);
-  }
-  try{
-    const hashedPassword = await hashPasswordServer(Password);
-    await b2Service.uploadFile(Buffer.from(hashedPassword), userId, 'text/plain');
+
+    return {
+      success: true,
+    };
   } catch (error) {
-    console.error('Error creating user:', error);
+    server.log.error({ err: error }, 'Login failed');
+
     return {
       success: false,
-      message: 'Error creating user',
-      error
-    }
+    };
   }
-  return {
-    success: true,
-    message: 'User created successfully'
-  }
-
 });
 
-// POST endpoint
-/*server.post('/api/fileList', async (request, reply) => {
-  const body:any = .listFiles();
-  server.log.info('Received data:', body);
-  return {
-    success: true,
-    received: body,
-    timestamp: new Date().toISOString(),
-  };
-});*/
+const signupSchema = {
+  body: {
+    type: 'object',
+    required: ['file', 'userId'],
+    properties: {
+      file: { type: 'string' },
+      userId: { type: 'string', minLength: 1 },
+    },
+    additionalProperties: false,
+  },
+} as const;
+
+server.post('/api/signup', async (request, reply) => {
+  const SignUpData = request.body as LoginData;
+  const userId = SignUpData.userId.trim().toLowerCase();
+
+  if (!userId) {
+    return reply.status(400).send({
+      success: false,
+      message: 'User ID is required',
+    });
+  }
+  try {
+    const existingFiles = await b2Service.listItems();
+
+    const userExists = existingFiles.files.some(
+      existingFile =>
+        existingFile.key?.toLowerCase() === userId
+    );
+    if (userExists) {
+      return reply.status(409).send({
+        success: false,
+        message: 'User already exists',
+      });
+    }
+    const plainPassword = Buffer.from(SignUpData.password, 'base64').toString('utf-8');
+    if (!plainPassword) {
+      return reply.status(400).send({
+        success: false,
+        message: 'Password is required',
+      });
+    }
+    console.log('Password is okay')
+
+    const hashedPassword = await hashPasswordServer(plainPassword);
+    await b2Service.uploadFile(
+      Buffer.from(hashedPassword, 'utf-8'),
+      userId,
+      'text/plain'
+    );
+
+    return {
+      success: true,
+      message: 'User created successfully',
+    };
+  } catch (error) {
+    server.log.error({ err: error }, 'Signup failed');
+
+    return reply.status(500).send({
+      success: false,
+      message: 'Error creating user',
+    });
+  }
+});
+
+server.setErrorHandler((error, request, reply) => {
+  const errAny = error as any;
+
+  server.log.error({ err: errAny, url: request.url }, 'Request failed');
+
+  const statusCode = typeof errAny?.statusCode === 'number' ? errAny.statusCode : 500;
+
+  reply.status(statusCode).send({
+    success: false,
+    message: statusCode < 500 && typeof errAny?.message === 'string' ? errAny.message : 'Internal server error',
+  });
+});
 
 const start = async () => {
   try {
-    await server.listen({ port: 3000, host: '0.0.0.0' });
+    await server.listen({
+      port: 3000,
+      host: '0.0.0.0',
+    });
+
     console.log('Сервер запущен на http://localhost:3000');
-  } catch (err) {
-    server.log.error(err);
+  } catch (error) {
+    server.log.error(error);
     process.exit(1);
   }
 };

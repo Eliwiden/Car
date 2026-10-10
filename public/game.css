@@ -95,3 +95,14 @@ html, body {
 #btn_right{
     right: 20px;
 }
+
+#user_info {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    z-index: 1000;
+    color: gold;
+    font-weight: bold;
+    font-size: 24px;
+    text-align: right;
+}

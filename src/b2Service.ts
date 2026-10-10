@@ -146,7 +146,6 @@ class B2Service {
       if (!response.Body) {
         throw new Error(`Empty response body for file: ${fileName}`);
       }
-
       const data = await response.Body.transformToByteArray();
 
       return {

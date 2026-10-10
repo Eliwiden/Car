@@ -69,8 +69,8 @@ let bObstacleEnough = false;
 let nGlobX = 100;
 export let coinCount = 0;
 let coinCounterDom: HTMLDivElement;
-export let idObstacle: NodeJS.Timeout;
-export let idCoins: NodeJS.Timeout;
+export let idObstacle: ReturnType<typeof setInterval>;
+export let idCoins: ReturnType<typeof setInterval>;
 
 
 let speed = 30;//easy: 30 medium: 50
@@ -100,6 +100,11 @@ export const oGlobData = new CGlobData();
 
 document.addEventListener('DOMContentLoaded', async function () {//Добавляем обработчик собятия "Loaded..."
     const urlParams = new URLSearchParams(window.location.search);//Параметры достаём все
+    const currentUser = urlParams.get('userid');//Конкретный параметр достаём
+    const domUserInfo = document.getElementById("user_info");//Находим элемент по АЙДИ
+    if (currentUser && domUserInfo) {//Проверям есть ли такой параметр
+        domUserInfo.innerText = `User: ${currentUser}`;
+    }
     const level = urlParams.get('level');//Конкретный параметр достаём
     if (level) {//Проверям есть ли такой параметр
         const domLevelInfo = document.getElementById("level_info");//Находим элемент по АЙДИ
@@ -157,7 +162,6 @@ document.addEventListener('DOMContentLoaded', async function () {//Добавл�
         // Эффект тряски машины при попадании (опционально)
         //car.nY += Math.sin(Date.now() * 0.01) * 3;    
     }, nDelayPit * 1000);
-
     idObstacle = setInterval(() => {
         const fieldRect = document.body.getBoundingClientRect();
 

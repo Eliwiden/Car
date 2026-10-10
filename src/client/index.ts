@@ -54,8 +54,46 @@ function getRequiredElement<T extends HTMLElement>(id: string): T {
   return element;
 }
 
+function ShowCurrUser(userName: string): void {
+  const loginButton = document.getElementById('loginButton');
+  const signupButton = document.getElementById('signupButton');
+
+  if (loginButton) {
+    loginButton.textContent = userName;
+  }
+
+  if (signupButton) {
+    signupButton.textContent = 'Logout';
+  }
+
+  localStorage.setItem('currentUser', userName);
+}
+
+function logout(): void {
+  localStorage.removeItem('currentUser');
+
+  const loginButton = document.getElementById('loginButton');
+  const signupButton = document.getElementById('signupButton');
+
+  if (loginButton) {
+    loginButton.textContent = 'Login';
+  }
+
+  if (signupButton) {
+    signupButton.textContent = 'Sign up';
+  }
+
+  location.reload();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('index.html loaded');
+
+  const currentUser = localStorage.getItem('currentUser');
+
+  if (currentUser) {
+    ShowCurrUser(currentUser);
+  }
 
   const domBtnAbout = document.getElementById('showAbout');
 
@@ -65,7 +103,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       try {
         const aFileList = await postData('fileList', 'Headlights');
-        alert(JSON.stringify(aFileList, null, 2));
       } catch (error) {
         alert(`Failed to load file list: ${error}`);
       }
@@ -89,7 +126,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const urlWithParams = new URL(
         location.origin + location.pathname + 'game.html'
       );
+
       urlWithParams.searchParams.set('level', '1');
+      urlWithParams.searchParams.set('userid', '' + (currentUser || 'guest'));
       window.open(urlWithParams, '_self');
     };
   }
@@ -101,6 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const urlWithParams = new URL(
         location.origin + location.pathname + 'levels.html'
       );
+
       window.open(urlWithParams, '_self');
     };
   }
@@ -122,8 +162,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      handleAuth(gmail, password, false);
       domLogin.style.display = 'none';
+      handleAuth(gmail, password, false);
     });
   }
 
@@ -135,7 +175,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const gmail = getRequiredElement<HTMLInputElement>('signupGmail').value.trim();
       const password = getRequiredElement<HTMLInputElement>('signupPassword').value;
-      const confirmPassword = getRequiredElement<HTMLInputElement>('confirmPassword').value;
+      const confirmPassword =
+        getRequiredElement<HTMLInputElement>('confirmPassword').value;
 
       if (!password) {
         alert('Enter your password.');
@@ -147,8 +188,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      handleAuth(gmail, password, true);
       domSignup.style.display = 'none';
+      handleAuth(gmail, password, true);
     });
   }
 
@@ -156,6 +197,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (domRegisterGame) {
     domRegisterGame.onclick = () => {
+      if (localStorage.getItem('currentUser')) {
+        return;
+      }
+
       domLogin.style.display = '';
     };
   }
@@ -164,7 +209,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (btnSignup) {
     btnSignup.onclick = () => {
-      domSignup.style.display = '';
+      if (localStorage.getItem('currentUser')) {
+        logout();
+      } else {
+        domSignup.style.display = '';
+      }
     };
   }
 });
@@ -180,14 +229,19 @@ async function handleAuth(
   });
 
   try {
-    const result = await sendAuthRequest(password, gmail, isSignup) as ApiResponse;
+    const result = (await sendAuthRequest(
+      password,
+      gmail,
+      isSignup
+    )) as ApiResponse;
+
     console.log('Auth result:', result);
 
     if (result.success) {
       console.log(isSignup ? 'Signup successful!' : 'Login successful!');
-      function ShowCurUserName(){
-        
-      }
+
+      ShowCurrUser(gmail);
+
       return;
     }
 
@@ -268,13 +322,29 @@ function showAuthFailure(isSignup: boolean): void {
 }
 
 function clearAuthForms(): void {
-  const loginGmail = document.getElementById('loginGmail') as HTMLInputElement | null;
-  const loginPassword = document.getElementById('loginPassword') as HTMLInputElement | null;
-  const confirmPassword = document.getElementById('confirmPassword') as HTMLInputElement | null;
+  const loginGmail = document.getElementById(
+    'loginGmail'
+  ) as HTMLInputElement | null;
 
-  if (loginGmail) loginGmail.value = '';
-  if (loginPassword) loginPassword.value = '';
-  if (confirmPassword) confirmPassword.value = '';
+  const loginPassword = document.getElementById(
+    'loginPassword'
+  ) as HTMLInputElement | null;
+
+  const confirmPassword = document.getElementById(
+    'confirmPassword'
+  ) as HTMLInputElement | null;
+
+  if (loginGmail) {
+    loginGmail.value = '';
+  }
+
+  if (loginPassword) {
+    loginPassword.value = '';
+  }
+
+  if (confirmPassword) {
+    confirmPassword.value = '';
+  }
 }
 
 async function uploadFile(
